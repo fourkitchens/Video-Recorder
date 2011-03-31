@@ -1,0 +1,153 @@
+<?php
+
+/**
+ * The default RTMP URL for recording the video streams.
+ */
+define('VIDEO_RECORDER_DEFAULT_RTMP_URL', 'rtmp://localhost/dvr/');
+
+/**
+ * The default HTTP URL for fetching recorded video streams.
+ */
+define('VIDEO_RECORDER_DEFAULT_HTTP_URL', 'http://localhost:8134/live/dvr/');
+
+/**
+ * Implements hook_menu().
+ */
+function video_recorder_menu() {
+  $items = array();
+  $items['admin/settings/video_recorder'] = array(
+    'title' => 'Video recorder',
+    'description' => 'Set basic recording settings for video recorder.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('video_recorder_admin'),
+    'access arguments' => array('administer video recorder settings'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'video_recorder.admin.inc',
+  );
+
+  $items['video_recorder/record/%'] = array(
+    'title' => 'Record Video',
+    'description' => 'Record a video using flash',
+    'page callback' => 'video_recorder_recorder',
+    'page arguments' => array(2),
+    'access arguments' => array('record video'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['video_recorder/record/popup/%'] = array(
+    'title' => 'Record Video Popup',
+    'description' => 'Record a video using flash in a modal frame',
+    'page callback' => 'video_recorder_recorder_modal',
+    'page arguments' => array(3),
+    'access arguments' => array('record video'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_perm().
+ */
+function video_recorder_perm() {
+  return array('administer video recorder settings', 'record video');
+}
+
+/**
+ * Records a video using flash.
+ */
+function video_recorder_recorder($video_id) {
+  $base = drupal_get_path('module', 'video_recorder');
+  drupal_add_js("{$base}/video_recorder.js");
+  return theme('video_recorder_recorder', $video_id, 'video-recorder',  variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL));
+}
+
+/**
+ * Records a video using flash in a modal frame.
+ */
+function video_recorder_recorder_modal($video_id) {
+  modalframe_child_js();
+  return video_recorder_recorder($video_id);
+}
+
+/**
+ * Fetch the HTTP playback URL for a video.
+ */
+function video_recorder_playback_http_url($video_id) {
+  $http_url = variable_get('video_recorder_http_url', VIDEO_RECORDER_DEFAULT_HTTP_URL);
+  $url = check_plain($http_url . $video_id . '.flv');
+  return $url;
+}
+
+/**
+ * Fetch the RTMP playback URL for a video.
+ */
+function video_recorder_playback_http_rtmp($video_id) {
+  $rtmp_url = variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL);
+  $url = check_plain($rtmp_url . $video_id);
+  return $url;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function video_recorder_theme($existing, $type, $theme, $path) {
+  return array(
+    'video_recorder_recorder' => array(
+      'arguments' => array('video_id' => NULL, 'id' => NULL, 'rtmp_url' => NULL),
+    ),
+  );
+}
+
+/**
+ * Themes the video recorder widget.
+ *
+ * @param $video_id
+ *   The unique identifier for the video to be recorded.
+ *
+ * @param $id
+ *  The id for the HTML element for the recorder.
+ *
+ * @param $rtmp_url
+ *  The target URL for streaming the video recording to.
+ */
+function theme_video_recorder_recorder($video_id, $id = NULL, $rtmp_url = NULL) {
+  global $base_path;
+
+  $video_id = check_plain($video_id);
+
+  if (is_null($id)) {
+    $id = 'video-recorder';
+  }
+  $id = check_plain($id);
+
+  if (is_null($rtmp_url)) {
+    $rtmp_url = variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL);
+  }
+  $rtmp_url = check_plain($rtmp_url);
+
+  $recorder = $base_path . drupal_get_path('module', 'video_recorder') . '/recorder.swf';
+
+  $save = t('Save');
+
+  $content = <<<HTML
+    <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="{$id}" class="video-recorder" width="640" height="480"
+      codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
+      <param name="movie" value="{$recorder}" />
+      <param name="quality" value="high" />
+      <param name="bgcolor" value="#ffffff" />
+      <param name="allowScriptAccess" value="sameDomain" />
+      <param name="FlashVars" value="server={$rtmp_url}&fps=30&fileName={$video_id}&height=480&width=640&maxLength=600" />
+      <embed src="{$recorder}" quality="high" bgcolor="#ffffff" width="640" height="480" name="recorder" align="middle" 
+        play="true" loop="false" quality="high" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" 
+        pluginspage="http://www.adobe.com/go/getflashplayer" 
+        FlashVars="server={$rtmp_url}&fps=30&fileName={$video_id}&height=480&width=640&maxLength=600">
+      </embed>
+    </object>
+
+    <div id="{$id}-save-wrapper" class="video-recorder-save-wrapper"><a href="#" id="{$id}-save-{$video_id}" class="video-recorder-save" rel="{$id}">{$save}</a></div>
+
+HTML;
+
+  return $content;
+}

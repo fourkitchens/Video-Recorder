@@ -1,0 +1,5 @@
+name = Video Recorder
+description = Records video using flash and store it on a flash media server.  Both Adobe Flash Media Server and Red 5 are supported.
+core = 6.x
+package = Video
+php = 5.2
