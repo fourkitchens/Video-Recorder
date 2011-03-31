@@ -149,10 +149,15 @@ function brightcove_recorder_upload($video_id) {
     return drupal_json(array('error' => 'Failed to download video from flash server.'));
   }
 
-  $tmp_file = tempnam(file_directory_temp(), 'video-') . '.flv';
+  // hack to create a secure file name for a temp file.
+  $tmp_file = tempnam(file_directory_temp(), 'video-');
+  unlink($tmp_file);
+  $tmp_file .= '.flv';
+  
   $bytes = file_put_contents($tmp_file, $video_stream);
 
   if (FALSE === $bytes) {
+    @unlink($tmp_file); // we use @ in case permission prevented writing the temp file
     drupal_set_header('Status: 500 Internal Server Error');
     return drupal_json(array('error' => 'Failed to write video local file.'));
   }
@@ -164,6 +169,7 @@ function brightcove_recorder_upload($video_id) {
   );
 
   $id = brightcove_upload_video($tmp_file, $meta);
+  unlink($tmp_file); // clean up after ourselves
   if (!$id) {
     drupal_set_header('Status: 500 Internal Server Error');
     return drupal_json(array('error' => 'Failed to upload video to brightcove.'));
