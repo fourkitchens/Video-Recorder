@@ -1,0 +1,15 @@
+diff --git a/sites/all/modules/contrib/modalframe/modalframe.module b/sites/all/modules/contrib/modalframe/modalframe.module
+index d14db98..f43f06a 100644
+--- a/sites/all/modules/contrib/modalframe/modalframe.module
++++ b/sites/all/modules/contrib/modalframe/modalframe.module
+@@ -237,8 +237,9 @@ function modalframe_child_js() {
+   }
+   $processed = TRUE;
+ 
+-  // Disable admin_menu, which is something child windows don't need.
++  // Disable admin_menu and admin, which is something child windows don't need.
+   module_invoke('admin_menu', 'suppress');
++  module_invoke('admin', 'suppress');
+ 
+   // This is required to get access to jQuery UI extensions to jQuery itself,
+   // such as the ':focusable' and ':tabbable' selectors.
