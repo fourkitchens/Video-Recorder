@@ -1,16 +1,6 @@
 <?php
 
 /**
- * The default RTMP URL for recording the video streams.
- */
-define('BRIGHTCOVE_RECORDER_DEFAULT_RTMP_URL', 'rtmp://localhost/recorder/');
-
-/**
- * The default HTTP URL for fetching recorded video streams.
- */
-define('BRIGHTCOVE_RECORDER_DEFAULT_HTTP_URL', 'http://localhost:5080/recorder/');
-
-/**
  * Implements hook_menu().
  */
 function brightcove_recorder_menu() {
