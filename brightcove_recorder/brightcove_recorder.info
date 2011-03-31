@@ -1,0 +1,7 @@
+name = Brightcove Recorder Field
+description = Records video stream from a webcam and stores them on the Brightcove video hosting service.
+core = 6.x
+package = Video
+
+dependencies[] = brightcove_cck
+dependencies[] = video_recorder
