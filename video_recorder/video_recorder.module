@@ -145,8 +145,10 @@ function theme_video_recorder_recorder($video_id, $id = NULL, $rtmp_url = NULL) 
       </embed>
     </object>
 
-    <div id="{$id}-save-wrapper" class="video-recorder-save-wrapper"><a href="#" id="{$id}-save-{$video_id}" class="video-recorder-save" rel="{$id}">{$save}</a></div>
-
+    <div id="{$id}-save-wrapper" class="video-recorder-save-wrapper ahah-progress">
+      <a href="#" id="{$id}-save-{$video_id}" class="video-recorder-save" rel="{$id}">{$save}</a>
+      <span style="display:none;" class="throbber"></span>
+    </div>
 HTML;
 
   return $content;

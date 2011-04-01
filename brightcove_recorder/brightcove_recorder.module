@@ -82,6 +82,7 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
   }
   return $form;
 }
+
 /**
  * Returns a string of highly randomized bytes (over the full 8-bit range).
  *
