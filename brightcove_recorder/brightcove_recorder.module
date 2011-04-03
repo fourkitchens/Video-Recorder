@@ -180,7 +180,7 @@ function brightcove_recorder_upload($video_id) {
   $video = new StdClass();
   $video->id = $id;
   $video->name = $video_id;
-  brightcove_cache_video($id, $video);
+  brightcove_video_cache_set($id, $video);
 
   return drupal_json(array('brightcove_id' => $id));
 }

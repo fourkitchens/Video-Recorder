@@ -1,5 +1,5 @@
 diff --git a/brightcove.module b/brightcove.module
-index 46a49c6..a7ea919 100644
+index 46a49c6..6b8f386 100644
 --- a/brightcove.module
 +++ b/brightcove.module
 @@ -36,7 +36,7 @@ function brightcove_menu() {
@@ -28,7 +28,7 @@ index 46a49c6..a7ea919 100644
 + * @param $video
 + *  The video object to be cached.
 + */
-+function brightcove_cache_video($id, $video) {
++function brightcove_video_cache_set($id, $video) {
 +  if (!isset($_SESSION['brightcove'])) {
 +    $_SESSION['brightcove'] = array();
 +  }
@@ -46,7 +46,7 @@ index 46a49c6..a7ea919 100644
 + * @return
 + *  Object the Brightcove video object.
 + */
-+function brightcove_video_from_cache($id) {
++function brightcove_video_cache_get($id) {
 +  $id = (int) $id;
 +  $key = "video_{$id}"; 
 +  if ($id && isset($_SESSION['brightcove'][$key])) {
@@ -56,7 +56,7 @@ index 46a49c6..a7ea919 100644
 +  return NULL;
 +}
 diff --git a/brightcove_cck/brightcove_cck.module b/brightcove_cck/brightcove_cck.module
-index f8f2340..c15d8b9 100644
+index f8f2340..db35825 100644
 --- a/brightcove_cck/brightcove_cck.module
 +++ b/brightcove_cck/brightcove_cck.module
 @@ -181,7 +181,7 @@ function brightcove_cck_field($op, &$node, $field, &$items, $teaser, $page) {
@@ -64,7 +64,7 @@ index f8f2340..c15d8b9 100644
              if (empty($video->id)) {
                // Check for video in session - uploaded file.
 -              if (!$_SESSION['video_' . $item['video_id']]) {
-+              if (is_null(brightcove_video_from_cache($item['video_id']))) {
++              if (is_null(brightcove_video_cache_get($item['video_id']))) {
                  form_set_error($error_element, t('%name: invalid video.', array('%name' => t($field['widget']['label']))));
                }
              }
@@ -73,7 +73,7 @@ index f8f2340..c15d8b9 100644
        // Matched ID, check if the video exists.
        $video = brightcove_video_load($id);
 -      if ($video->id != $id && !$_SESSION['video_' . $id]) {
-+      if ($video->id != $id && is_null(brightcove_video_from_cache($id))) {
++      if ($video->id != $id && is_null(brightcove_video_cache_get($id))) {
          form_error($element, t('%name: Found no valid video with that name. Please note that it might take several minutes after the video has been uploaded in Brightcove Studio to appear in the API.', array('%name' => t($field['widget']['label']))));
        }
      } else {
@@ -83,8 +83,8 @@ index f8f2340..c15d8b9 100644
        return array($field_key => check_plain($video->name) . ' [id:' . $video->id . ']');
 -    } else if ($_SESSION['video_' . $id]) {
 -      return array($field_key => check_plain($_SESSION['video_' . $id]->name) . ' [id:' . $id . ']');
-+    } else if (!is_null(brightcove_video_from_cache($id))) {
-+      return array($field_key => check_plain(brightcove_video_from_cache($id)->name) . ' [id:' . $id . ']');
++    } else if (!is_null(brightcove_video_cache_get($id))) {
++      return array($field_key => check_plain(brightcove_video_cache_get($id)->name) . ' [id:' . $id . ']');
      }
  
    }
@@ -93,7 +93,7 @@ index f8f2340..c15d8b9 100644
      $video->id = $id;
      $video->name = $form_state['values']['title'];
 -    $_SESSION['video_' . $id] = $video;
-+    brightcove_cache_video($id, $video);
++    brightcove_video_cache_set($id, $video);
  
      db_query('DELETE FROM {files} WHERE fid = %d', $file->fid);
      unlink($file->filepath);
