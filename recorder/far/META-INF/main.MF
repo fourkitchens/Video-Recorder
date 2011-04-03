@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Created-By: 
+
+Signed-App-Hosts: Any
+
+Name: main.asc
+SHA1-Digest: XHjjbuUiNf0MNp6KFDPUq9bZA8s=
+
+Name: Application.xml
+SHA1-Digest: LCL9QLZ33jGrQ1yqQrewGagGz9c=
+

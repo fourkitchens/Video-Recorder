@@ -1,0 +1,8 @@
+<Application>
+	<SharedObjManager>
+			<ClientAccess override="no">true</ClientAccess>
+	</SharedObjManager>
+	<StreamManager>
+            <StreamRecord override="no">false</StreamRecord>
+    </StreamManager>
+</Application>

@@ -1,0 +1,30 @@
+# This configuration file can be used to specify the domains which are  
+# allowed to host an HTML file which can possibly embed a client .swf file 
+# for Live (out of the box) application. By default, this authentication is 
+# disabled 
+#
+#  - There can be at most one domain entry per line e.g. to add domains 
+#    http://myhost1.com and https://www.abc.myhost2.com the corresponding entries should be:
+#
+#	myhost1.com
+#	www.abc.myhost2.com
+#    		
+#    	NOTE: There must not be any space character in the line containing a domain entry. 
+# 	Such entries are discarded by this application after logging a warning Message .
+#
+#  - Adding an entry for a domain also allows all its subdomains to have file hosting 
+# permission.
+#
+#  - An Asterisk (*) can be used to allow all domains to successfully authenticate. 
+#
+#  - Applicable only for the cases when the html page is accessed through http/https URL.
+#
+ 
+
+
+#
+# To enable domain name based authentication for HTML file hosts, remove the following *  
+# and add new entries.
+#
+
+*
