@@ -75,7 +75,7 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
         '#id' => "edit-field-bc-{$i}-record-{$video_id}",
 	'#attributes' => array('class' => 'brightcove-recorder-record-button'),
       );
-      $button = array(array_merge($form[$name][$i]['actions']['upload'], $record_args));
+      $button = array(array_merge($form[$name][$i]['actions']['browse'], $record_args));
       array_splice($form[$name][$i]['actions'], 1, 0, $button);
       $form[$name][$i]['video_id']['#attributes']['class'] .= " brightcove-video-{$video_id}";
     }
