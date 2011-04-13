@@ -23,12 +23,17 @@ define('VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION', 70);
 /**
  * Frames per second (FPS) for uploaded videos
  */
-define('VIDEO_RECORDER_DEFAULT_CAMERA_FPS', 24);
+define('VIDEO_RECORDER_DEFAULT_CAMERA_FPS', 30);
 
 /**
  * The number of seconds between each keyframe for uploaded videos.
  */
 define('VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME', 2);
+
+/**
+ * The maximum length (in seconds) for uploaded videos.
+ */
+define('VIDEO_RECORDER_DEFAULT_CAMERA_LENGTH', 600);
 
 
 
@@ -81,7 +86,18 @@ function video_recorder_perm() {
 function video_recorder_recorder($video_id) {
   $base = drupal_get_path('module', 'video_recorder');
   drupal_add_js("{$base}/video_recorder.js");
-  return theme('video_recorder_recorder', $video_id, 'video-recorder',  variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL));
+
+  $options = array(
+    'id' => 'video-recorder',
+    'rtmp_url' => NULL,
+    'bandwidth' => NULL,
+    'compression' => NULL,
+    'fps' => NULL,
+    'kfs' => NULL,
+    'length' => NULL,
+  );
+
+  return theme('video_recorder_recorder', $video_id, $options);
 }
 
 /**
@@ -118,11 +134,15 @@ function video_recorder_theme($existing, $type, $theme, $path) {
     'video_recorder_recorder' => array(
       'arguments' => array(
         'video_id' => NULL,
-        'id' => NULL,
-        'rtmp_url' => NULL,
-        'bandwidth' => NULL,
-        'compression' => NULL,
-        'keyframe' => NULL,
+        'options' => array(
+          'id' => NULL,
+          'rtmp_url' => NULL,
+          'bandwidth' => NULL,
+          'compression' => NULL,
+          'fps' => NULL,
+          'kfs' => NULL,
+          'length' => NULL,
+        ),
       ),
     ),
   );
@@ -140,39 +160,42 @@ function video_recorder_theme($existing, $type, $theme, $path) {
  * @param $rtmp_url
  *  The target URL for streaming the video recording to.
  */
-function theme_video_recorder_recorder($video_id, $id = NULL, $rtmp_url = NULL, $bandwidth = NULL, $compression = NULL, $keyframeSeconds = NULL, $fps = NULL) {
+function theme_video_recorder_recorder($video_id, $options=array()) {
   global $base_path;
 
-  $video_id = check_plain($video_id);
+  if (is_null($options['id'])) {
+    $options['id'] = 'video-recorder';
+  }
+  if (is_null($options['rtmp_url'])) {
+    $options['rtmp_url'] = variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL);
+  }
+  if (is_null($options['bandwidth'])) {
+    $options['bandwidth'] = variable_get('video_recorder_camera_bandwidth', VIDEO_RECORDER_DEFAULT_CAMERA_BANDWIDTH);
+  }
+  if (is_null($options['compression'])) {
+    $options['compression'] = variable_get('video_recorder_camera_compression', VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION);
+  }
+  if (is_null($options['fps'])) {
+    $options['fps'] = variable_get('video_recorder_camera_fps', VIDEO_RECORDER_DEFAULT_CAMERA_FPS);
+  }
+  if (is_null($options['kfs'])) {
+    $options['kfs'] = variable_get('video_recorder_camera_keyframe', VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME);
+  }
+  if (is_null($options['length'])) {
+    $options['length'] = variable_get('video_recorder_camera_length', VIDEO_RECORDER_DEFAULT_CAMERA_LENGTH);
+  }
 
-  if (is_null($id)) {
-    $id = 'video-recorder';
-  }
-  $id = check_plain($id);
+  $video_id     = check_plain($video_id);
+  $id           = check_plain($options['id']);
+  $rtmp_url     = check_plain($options['rtmp_url']);
+  $bandwidth    = check_plain($options['bandwidth']);
+  $compression  = check_plain($options['compression']);
+  $fps          = (int) $options['fps'];
+  $kfs          = (int) $options['kfs'];
+  $length       = (int) $options['length'];
 
-  if (is_null($rtmp_url)) {
-    $rtmp_url = variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL);
-  }
-  if (is_null($bandwidth)) {
-    $bandwidth = variable_get('video_recorder_camera_bandwidth', VIDEO_RECORDER_DEFAULT_CAMERA_BANDWIDTH);
-  }
-  if (is_null($compression)) {
-    $compression = variable_get('video_recorder_camera_compression', VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION);
-  }
-  if (is_null($fps)) {
-    $fps = variable_get('video_recorder_camera_fps', VIDEO_RECORDER_DEFAULT_CAMERA_FPS);
-  }
-  if (is_null($keyframeSeconds)) {
-    $keyframeSeconds = variable_get('video_recorder_camera_keyframe', VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME);
-  }
-
-  $rtmp_url = check_plain($rtmp_url);
-  $bandwidth = check_plain($bandwidth);
-  $compression = check_plain($compression);
-  $fps = (int) $fps;
-  $keyframeSeconds = (int) $keyframeSeconds;
-
-  $keyframe = $fps * $keyframeSeconds;
+  // calculate number of frames between each keyframe based on current FPS
+  $keyframe = $fps * $kfs;
 
   $recorder = $base_path . drupal_get_path('module', 'video_recorder') . '/recorder.swf';
 
@@ -186,11 +209,11 @@ function theme_video_recorder_recorder($video_id, $id = NULL, $rtmp_url = NULL, 
         <param name="quality" value="high" />
         <param name="bgcolor" value="#ffffff" />
         <param name="allowScriptAccess" value="sameDomain" />
-        <param name="FlashVars" value="server={$rtmp_url}&fileName={$video_id}&height=480&width=640&maxLength=600&bandwidth={$bandwidth}&compression={$compression}&fps={$fps}&keyframe={$keyframe}" />
+        <param name="FlashVars" value="server={$rtmp_url}&fileName={$video_id}&height=480&width=640&maxLength={$length}&bandwidth={$bandwidth}&compression={$compression}&fps={$fps}&keyframe={$keyframe}" />
         <embed src="{$recorder}" quality="high" bgcolor="#ffffff" width="640" height="480" name="recorder" align="middle" 
           play="true" loop="false" quality="high" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" 
           pluginspage="http://www.adobe.com/go/getflashplayer" 
-          FlashVars="server={$rtmp_url}&fileName={$video_id}&height=480&width=640&maxLength=600&bandwidth={$bandwidth}&compression={$compression}&fps={$fps}&keyframe={$keyframe}">
+          FlashVars="server={$rtmp_url}&fileName={$video_id}&height=480&width=640&maxLength={$length}&bandwidth={$bandwidth}&compression={$compression}&fps={$fps}&keyframe={$keyframe}">
         </embed>
       </object>
     </div>

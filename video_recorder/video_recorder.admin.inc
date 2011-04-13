@@ -33,6 +33,13 @@ function video_recorder_admin() {
     '#collapsed'      => FALSE,
     '#collapsible'    => FALSE,
   );
+  $form['video_recorder_camera']['video_recorder_camera_length'] = array(
+    '#type'           => 'textfield',
+    '#title'          => t('Maximum Video Length'),
+    '#default_value'  => variable_get('video_recorder_camera_length', VIDEO_RECORDER_DEFAULT_CAMERA_LENGTH),
+    '#description'    => t("The maximum video length, measured in seconds. <br /> <strong>Default is 600, which is 10 minutes.</strong>"),
+    '#required'       => TRUE,
+  );
   $form['video_recorder_camera']['video_recorder_camera_bandwidth'] = array(
     '#type'           => 'textfield',
     '#title'          => t('Bandwidth Limit'),
@@ -51,15 +58,12 @@ function video_recorder_admin() {
     '#type'           => 'select',
     '#title'          => t('Frames Per Second'),
     '#default_value'  => variable_get('video_recorder_camera_fps', VIDEO_RECORDER_DEFAULT_CAMERA_FPS),
-    '#description'    => t("Number of frames per second for the the uploaded videos. Higher values mean smoother video."),
+    '#description'    => t("Number of frames per second for the the uploaded videos. Higher values produce smoother video."),
     '#options'        => array(
-      '4'   => t('4 fps (very low, choppy quality)'),
-      '8'   => t('8 fps (low quality)'),
-      '12'  => t('12 fps (passable quality)'),
-      '24'  => t('24 fps (regular internet video)'),
-      '30'  => t('30 fps (TV smoothness)'),
-      '45'  => t('45 fps (above TV)'),
-      '60'  => t('60 fps (very high quality)'),
+      '12'  => t('12 fps (Low Quality)'),
+      '25'  => t('25 fps (Standard Definition PAL TV)'),
+      '30'  => t('30 fps (Standard Definition NTSC TV)'),
+      '60'  => t('60 fps (HD TV)'),
     ),
     '#required' => TRUE,
   );
