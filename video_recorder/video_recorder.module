@@ -3,12 +3,12 @@
 /**
  * The default RTMP URL for recording the video streams.
  */
-define('VIDEO_RECORDER_DEFAULT_RTMP_URL', 'rtmp://50.17.205.190/recorder/');
+define('VIDEO_RECORDER_DEFAULT_RTMP_URL', 'rtmp://localhost/dvr/');
 
 /**
  * The default HTTP URL for fetching recorded video streams.
  */
-define('VIDEO_RECORDER_DEFAULT_HTTP_URL', 'http://50.17.205.190/recorder/');
+define('VIDEO_RECORDER_DEFAULT_HTTP_URL', 'http://localhost:8134/live/dvr/');
 
 /**
  * Implements hook_menu().
@@ -137,11 +137,11 @@ function theme_video_recorder_recorder($video_id, $id = NULL, $rtmp_url = NULL) 
       <param name="quality" value="high" />
       <param name="bgcolor" value="#ffffff" />
       <param name="allowScriptAccess" value="sameDomain" />
-      <param name="FlashVars" value="server={$rtmp_url}&fps=24&fileName={$video_id}&height=480&width=640&maxLength=600" />
+      <param name="FlashVars" value="server={$rtmp_url}&fps=30&fileName={$video_id}&height=480&width=640&maxLength=600" />
       <embed src="{$recorder}" quality="high" bgcolor="#ffffff" width="640" height="480" name="recorder" align="middle" 
         play="true" loop="false" quality="high" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" 
         pluginspage="http://www.adobe.com/go/getflashplayer" 
-        FlashVars="server={$rtmp_url}&fps=24&fileName={$video_id}&height=480&width=640&maxLength=600">
+        FlashVars="server={$rtmp_url}&fps=30&fileName={$video_id}&height=480&width=640&maxLength=600">
       </embed>
     </object>
 
