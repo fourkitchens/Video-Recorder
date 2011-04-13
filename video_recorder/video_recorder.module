@@ -11,6 +11,28 @@ define('VIDEO_RECORDER_DEFAULT_RTMP_URL', 'rtmp://localhost/dvr/');
 define('VIDEO_RECORDER_DEFAULT_HTTP_URL', 'http://localhost:8134/live/dvr/');
 
 /**
+ * The default bandwidth limit when recording video.
+ */
+define('VIDEO_RECORDER_DEFAULT_CAMERA_BANDWIDTH', 0);
+
+/**
+ * The default compression quality when recording video.
+ */
+define('VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION', 70);
+
+/**
+ * Frames per second (FPS) for uploaded videos
+ */
+define('VIDEO_RECORDER_DEFAULT_CAMERA_FPS', 24);
+
+/**
+ * The number of seconds between each keyframe for uploaded videos.
+ */
+define('VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME', 2);
+
+
+
+/**
  * Implements hook_menu().
  */
 function video_recorder_menu() {
@@ -94,7 +116,14 @@ function video_recorder_playback_http_rtmp($video_id) {
 function video_recorder_theme($existing, $type, $theme, $path) {
   return array(
     'video_recorder_recorder' => array(
-      'arguments' => array('video_id' => NULL, 'id' => NULL, 'rtmp_url' => NULL),
+      'arguments' => array(
+        'video_id' => NULL,
+        'id' => NULL,
+        'rtmp_url' => NULL,
+        'bandwidth' => NULL,
+        'compression' => NULL,
+        'keyframe' => NULL,
+      ),
     ),
   );
 }
@@ -111,7 +140,7 @@ function video_recorder_theme($existing, $type, $theme, $path) {
  * @param $rtmp_url
  *  The target URL for streaming the video recording to.
  */
-function theme_video_recorder_recorder($video_id, $id = NULL, $rtmp_url = NULL) {
+function theme_video_recorder_recorder($video_id, $id = NULL, $rtmp_url = NULL, $bandwidth = NULL, $compression = NULL, $keyframeSeconds = NULL, $fps = NULL) {
   global $base_path;
 
   $video_id = check_plain($video_id);
@@ -124,7 +153,26 @@ function theme_video_recorder_recorder($video_id, $id = NULL, $rtmp_url = NULL) 
   if (is_null($rtmp_url)) {
     $rtmp_url = variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL);
   }
+  if (is_null($bandwidth)) {
+    $bandwidth = variable_get('video_recorder_camera_bandwidth', VIDEO_RECORDER_DEFAULT_CAMERA_BANDWIDTH);
+  }
+  if (is_null($compression)) {
+    $compression = variable_get('video_recorder_camera_compression', VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION);
+  }
+  if (is_null($fps)) {
+    $fps = variable_get('video_recorder_camera_fps', VIDEO_RECORDER_DEFAULT_CAMERA_FPS);
+  }
+  if (is_null($keyframeSeconds)) {
+    $keyframeSeconds = variable_get('video_recorder_camera_keyframe', VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME);
+  }
+
   $rtmp_url = check_plain($rtmp_url);
+  $bandwidth = check_plain($bandwidth);
+  $compression = check_plain($compression);
+  $fps = check_plain($fps);
+  $keyframeSeconds = check_plain($keyframeSeconds);
+
+  $keyframe = $fps * $keyframeSeconds;
 
   $recorder = $base_path . drupal_get_path('module', 'video_recorder') . '/recorder.swf';
 
@@ -137,11 +185,11 @@ function theme_video_recorder_recorder($video_id, $id = NULL, $rtmp_url = NULL) 
       <param name="quality" value="high" />
       <param name="bgcolor" value="#ffffff" />
       <param name="allowScriptAccess" value="sameDomain" />
-      <param name="FlashVars" value="server={$rtmp_url}&fps=30&fileName={$video_id}&height=480&width=640&maxLength=600" />
+      <param name="FlashVars" value="server={$rtmp_url}&fileName={$video_id}&height=480&width=640&maxLength=600&bandwidth={$bandwidth}&compression={$compression}&fps={$fps}&keyframe={$keyframe}" />
       <embed src="{$recorder}" quality="high" bgcolor="#ffffff" width="640" height="480" name="recorder" align="middle" 
         play="true" loop="false" quality="high" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" 
         pluginspage="http://www.adobe.com/go/getflashplayer" 
-        FlashVars="server={$rtmp_url}&fps=30&fileName={$video_id}&height=480&width=640&maxLength=600">
+        FlashVars="server={$rtmp_url}&fileName={$video_id}&height=480&width=640&maxLength=600&bandwidth={$bandwidth}&compression={$compression}&fps={$fps}&keyframe={$keyframe}">
       </embed>
     </object>
 

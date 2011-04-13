@@ -26,7 +26,10 @@ public var DEBUG:Boolean=false;
 public var recordingTimer:Timer = new Timer( 1000 , 0 );
 [Bindable] public var timeLeft:String="";
 
-
+// Drupal module integration
+public var bandwidth:int=0;
+public var compression:int=70;
+public var keyFrameInterval:int=60;
 
 public function init():void {
 	myRecorder = new Recorder();
@@ -49,6 +52,11 @@ public function init():void {
 	
 	Application.application.width = myRecorder.width;
 	Application.application.height = myRecorder.height;
+
+	// Fetch Drupal module values from FlashVars
+	bandwidth = Application.application.parameters.bandwidth;
+	compression = Application.application.parameters.compression;
+	keyframe = Application.application.parameters.keyframe;
 
 	recordingTimer.addEventListener( "timer" , decrementTimer );
 
@@ -191,7 +199,9 @@ private  function prepareStreams():void {
 		if (camera.muted) 	{
 			Security.showSettings(SecurityPanel.DEFAULT);
 		}
+		camera.setQuality(bandwidth,compression);
 		camera.setMode(myRecorder.width,myRecorder.height,myRecorder.fps);
+		camera.setKeyFrameInterval(keyframe);
 		myWebcam.attachCamera(camera);
 		nsOutGoing.attachCamera(camera);
 		myRecorder.cameraDetected=true;

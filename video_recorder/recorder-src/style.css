@@ -26,36 +26,27 @@
             dataTipPlacement: right;
             dataTipOffset: 0;
         }
-        
-        @font-face {
-            src: local("Arial");
-            font-weight: normal;
-            fontFamily: ArialEmbedded;
-        }
-
-
-                
         .arial16E {
-            fontFamily: "ArialEmbedded";
+            fontFamily: Arial;
             fontSize: 16;
         }
         .arial14E {
-            fontFamily: "ArialEmbedded";
+            fontFamily: Arial;
             fontSize: 14;
         }        
         .arial12E {
-            fontFamily: "ArialEmbedded";
+            fontFamily: Arial;
             fontSize: 12;
         }
         .arial10E {
-            fontFamily: "ArialEmbedded";
+            fontFamily: Arial;
             fontSize: 10;
         }
 
                 
 	ToolTip {
-	            fontFamily: ArialEmbedded;
-	            font-size:13;
+            fontFamily: Arial;
+            font-size:13;
         }
         
         
