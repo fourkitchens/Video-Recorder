@@ -19,7 +19,7 @@ Drupal.behaviors.brightcoveRecorderAttachActions = function(context) {
 	  videoId = data,
 	  requestURL = Drupal.settings.basePath + 'brightcove_recorder/upload/' + videoId;
           $('.throbber').show();
-	  $.getJSON(requestURL, function(data) {
+	  $.post(requestURL, '', function(data) {
 	    if (data.brightcove_id) {
 	      var target = $('input.brightcove-video-' + videoId, window.parent.document);
 	      $('input.brightcove-video-' + videoId, window.parent.document).val('[id:' + data.brightcove_id + ']');
@@ -29,7 +29,7 @@ Drupal.behaviors.brightcoveRecorderAttachActions = function(context) {
 	    window.alert('Unable to save video. Please try again');
             $('.throbber').hide();
             return false;
-	  });
+	  }, 'json');
       })
       .addClass('processed');
     });
