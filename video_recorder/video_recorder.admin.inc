@@ -6,49 +6,76 @@
 function video_recorder_admin() {
   $form = array();
 
-  $form['video_recorder_rtmp_url'] = array(
-    '#type' => 'textfield',
-    '#title' => t('RTMP URL'),
-    '#default_value' => variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL),
-    '#description' => t("The RTMP URL used for recording the live video streams."),
-    '#required' => TRUE,
+  $form['video_recorder_server'] = array(
+    '#type'           => 'fieldset',
+    '#title'          => t('Server Settings'),
+    '#collapsed'      => FALSE,
+    '#collapsible'    => FALSE,
+  );
+  $form['video_recorder_server']['video_recorder_rtmp_url'] = array(
+    '#type'           => 'textfield',
+    '#title'          => t('RTMP URL'),
+    '#default_value'  => variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL),
+    '#description'    => t("The RTMP URL used for recording the live video streams."),
+    '#required'       => TRUE,
+  );
+  $form['video_recorder_server']['video_recorder_http_url'] = array(
+    '#type'           => 'textfield',
+    '#title'          => t('HTTP URL'),
+    '#default_value'  => variable_get('video_recorder_http_url', VIDEO_RECORDER_DEFAULT_HTTP_URL),
+    '#description'    => t("The HTTP URL used for fetching the recorded video streams."),
+    '#required'       => TRUE,
   );
 
-  $form['video_recorder_http_url'] = array(
-    '#type' => 'textfield',
-    '#title' => t('HTTP URL'),
-    '#default_value' => variable_get('video_recorder_http_url', VIDEO_RECORDER_DEFAULT_HTTP_URL),
-    '#description' => t("The HTTP URL used for fetching the recorded video streams."),
+  $form['video_recorder_camera'] = array(
+    '#type'           => 'fieldset',
+    '#title'          => t('Video Quality Settings'),
+    '#collapsed'      => FALSE,
+    '#collapsible'    => FALSE,
+  );
+  $form['video_recorder_camera']['video_recorder_camera_bandwidth'] = array(
+    '#type'           => 'textfield',
+    '#title'          => t('Bandwidth Limit'),
+    '#default_value'  => variable_get('video_recorder_camera_bandwidth', VIDEO_RECORDER_DEFAULT_CAMERA_BANDWIDTH),
+    '#description'    => t("The bandwidth limit for the Flash video recorder. Measured in Bytes per second.<br /> <strong>Set to 0 for unlimited.</strong>"),
+    '#required'       => TRUE,
+  );
+  $form['video_recorder_camera']['video_recorder_camera_compression'] = array(
+    '#type'           => 'textfield',
+    '#title'          => t('Minimum Compression Quality'),
+    '#default_value'  => variable_get('video_recorder_camera_compression', VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION),
+    '#description'    => t("The minimum compression quality for the Flash video recorder.<br /> <strong>0 is poor; 100 is full quality.</strong>"),
+    '#required'       => TRUE,
+  );
+  $form['video_recorder_camera']['video_recorder_camera_fps'] = array(
+    '#type'           => 'select',
+    '#title'          => t('Frames Per Second'),
+    '#default_value'  => variable_get('video_recorder_camera_fps', VIDEO_RECORDER_DEFAULT_CAMERA_FPS),
+    '#description'    => t("Number of frames per second for the the uploaded videos. Higher values mean smoother video."),
+    '#options'        => array(
+      '4'   => t('4 fps (very low, choppy quality)'),
+      '8'   => t('8 fps (low quality)'),
+      '12'  => t('12 fps (passable quality)'),
+      '24'  => t('24 fps (regular internet video)'),
+      '30'  => t('30 fps (TV smoothness)'),
+      '45'  => t('45 fps (above TV)'),
+      '60'  => t('60 fps (very high quality)'),
+    ),
     '#required' => TRUE,
   );
-
-  $form['video_recorder_camera_bandwidth'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Bandwidth Limit'),
-    '#default_value' => variable_get('video_recorder_camera_bandwidth', VIDEO_RECORDER_DEFAULT_CAMERA_BANDWIDTH),
-    '#description' => t("The bandwidth limit for the Flash video recorder. Measured in Bytes per second. Set to 0 for unlimited."),
-    '#required' => TRUE,
-  );
-
-  $form['video_recorder_camera_compression'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Minimum Compression Quality'),
-    '#default_value' => variable_get('video_recorder_camera_compression', VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION),
-    '#description' => t("The minimum compression quality for the Flash video recorder. 0 is poor, 100 is full quality."),
-    '#required' => TRUE,
-  );
-
-  /*
-   * TODO - rupl 2011-04-12
-   * Should this be declared in seconds, with extra processing added to the
-   * SWF to determine the number of frames needed for current FPS?
-   */
-  $form['video_recorder_camera_keyframe'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Keyframe Interval'),
-    '#default_value' => variable_get('video_recorder_camera_keyframe', VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME),
-    '#description' => t("The key frame interval for video compression. Currently declared in frames. 24 = 1 second between keyframes"),
-    '#required' => TRUE,
+  $form['video_recorder_camera']['video_recorder_camera_keyframe'] = array(
+    '#type'           => 'select',
+    '#title'          => t('Keyframe Interval'),
+    '#default_value'  => variable_get('video_recorder_camera_keyframe', VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME),
+    '#description'    => t("Number of seconds between each keyframe. This setting will remain accurate as you change FPS."),
+    '#options'        => array(
+      '1'   => t('1 second'),
+      '2'   => t('2 seconds'),
+      '3'   => t('3 seconds'),
+      '5'   => t('5 seconds'),
+      '10'  => t('10 seconds'),
+    ),
+    '#required'       => TRUE,
   );
 
   return system_settings_form($form);
