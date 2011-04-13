@@ -28,8 +28,10 @@ function brightcove_recorder_init() {
  * Implements hook_form_alter().
  */
 function brightcove_recorder_form_alter(&$form, &$form_state, $form_id) {
+
   if (!isset($form['#node']) || !isset($form['type']['#value']) 
-    || $form_id != $form['type']['#value'] .'_node_form') {
+    || $form_id != $form['type']['#value'] .'_node_form'
+    || !user_access('record video')) {
     return;
   }
 
@@ -52,9 +54,6 @@ function brightcove_recorder_form_alter(&$form, &$form_state, $form_id) {
  * Implements form after_build callback.
  */
 function brightcove_recorder_node_form_after_build($form, &$form_state) {
-  if (!user_access('record video')) {
-    return $form;
-  }
 
   $record = t('Record');
   foreach ($form['#field_info'] as $name => $field) {
