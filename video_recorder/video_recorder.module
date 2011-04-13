@@ -163,25 +163,25 @@ function video_recorder_theme($existing, $type, $theme, $path) {
 function theme_video_recorder_recorder($video_id, $options=array()) {
   global $base_path;
 
-  if (is_null($options['id'])) {
+  if ($options['id'] === NULL) {
     $options['id'] = 'video-recorder';
   }
-  if (is_null($options['rtmp_url'])) {
+  if ($options['rtmp_url'] === NULL) {
     $options['rtmp_url'] = variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL);
   }
-  if (is_null($options['bandwidth'])) {
+  if ($options['bandwidth'] === NULL) {
     $options['bandwidth'] = variable_get('video_recorder_camera_bandwidth', VIDEO_RECORDER_DEFAULT_CAMERA_BANDWIDTH);
   }
-  if (is_null($options['compression'])) {
+  if ($options['compression'] === NULL) {
     $options['compression'] = variable_get('video_recorder_camera_compression', VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION);
   }
-  if (is_null($options['fps'])) {
+  if ($options['fps'] === NULL) {
     $options['fps'] = variable_get('video_recorder_camera_fps', VIDEO_RECORDER_DEFAULT_CAMERA_FPS);
   }
-  if (is_null($options['kfs'])) {
+  if ($options['kfs'] === NULL) {
     $options['kfs'] = variable_get('video_recorder_camera_keyframe', VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME);
   }
-  if (is_null($options['length'])) {
+  if ($options['length'] === NULL) {
     $options['length'] = variable_get('video_recorder_camera_length', VIDEO_RECORDER_DEFAULT_CAMERA_LENGTH);
   }
 
