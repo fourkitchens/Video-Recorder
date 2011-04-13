@@ -102,11 +102,11 @@ function video_recorder_admin_validate($form, &$form_state) {
 
   $http_parts = @parse_url($form_state['values']['video_recorder_http_url']);
   if (!isset($http_parts['scheme']) || 'http' !== substr($http_parts['scheme'], 0, 4)
-    || !valid_url($form_state['values']['video_recorder_http_url'])){
+    || !valid_url($form_state['values']['video_recorder_http_url'])) {
     form_set_error('video_recorder_http_url', t('The URL must be a valid HTTP URL'));
   }
 
   if ($form_state['values']['video_recorder_camera_compression'] < 0 || $form_state['values']['video_recorder_camera_compression'] > 100) {
-    form_set_error('video_recorder_camera_compression', t('Compression quality must be a number from 0 to 100. '));
+    form_set_error('video_recorder_camera_compression', t('Compression quality must be a number from 0 to 100.'));
   }
 }

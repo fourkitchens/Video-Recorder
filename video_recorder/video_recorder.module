@@ -88,13 +88,13 @@ function video_recorder_recorder($video_id) {
   drupal_add_js("{$base}/video_recorder.js");
 
   $options = array(
-    'id' => 'video-recorder',
-    'rtmp_url' => NULL,
-    'bandwidth' => NULL,
+    'id'          => 'video-recorder',
+    'rtmp_url'    => NULL,
+    'bandwidth'   => NULL,
     'compression' => NULL,
-    'fps' => NULL,
-    'kfs' => NULL,
-    'length' => NULL,
+    'fps'         => NULL,
+    'kfs'         => NULL,
+    'length'      => NULL,
   );
 
   return theme('video_recorder_recorder', $video_id, $options);
@@ -133,15 +133,15 @@ function video_recorder_theme($existing, $type, $theme, $path) {
   return array(
     'video_recorder_recorder' => array(
       'arguments' => array(
-        'video_id' => NULL,
-        'options' => array(
-          'id' => NULL,
-          'rtmp_url' => NULL,
-          'bandwidth' => NULL,
+        'video_id'  => NULL,
+        'options'   => array(
+          'id'          => NULL,
+          'rtmp_url'    => NULL,
+          'bandwidth'   => NULL,
           'compression' => NULL,
-          'fps' => NULL,
-          'kfs' => NULL,
-          'length' => NULL,
+          'fps'         => NULL,
+          'kfs'         => NULL,
+          'length'      => NULL,
         ),
       ),
     ),
@@ -154,11 +154,18 @@ function video_recorder_theme($existing, $type, $theme, $path) {
  * @param $video_id
  *   The unique identifier for the video to be recorded.
  *
- * @param $id
- *  The id for the HTML element for the recorder.
+ * @param $options
+ *   An array of parameters that get sent to the Flash recorder.
+ *    id           - The id for the HTML element for the recorder.
+ *    rtmp_url     - The target URL for streaming the video recording to.
+ *    bandwidth    - The maximum amount of bandwidth an uploaded video will consume.
+ *    compression  - The minimum compression quality an uploaded video must maintain.
+ *    fps          - The number of frames per second an uploaded video will have.
+ *    kfs          - The number of seconds in between each keyframe.
+ *    length       - The maximum length of an uploaded video, measured in seconds.
  *
- * @param $rtmp_url
- *  The target URL for streaming the video recording to.
+ * @return
+ *   HTML ready for the browser
  */
 function theme_video_recorder_recorder($video_id, $options=array()) {
   global $base_path;
