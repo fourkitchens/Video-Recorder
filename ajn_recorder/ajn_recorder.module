@@ -93,9 +93,6 @@ function ajn_recorder_node_form_after_build($form, &$form_state) {
       continue;
     }
 
-    dpm($field, 'field');
-    dpm($form[$name], 'form');
-
     $multiple = (bool) $field['multiple'];
     $count = $field['multiple'];
     if ($count <= 1) {
