@@ -1,0 +1,110 @@
+<?php
+
+/**
+ * Implements hook_perm().
+ */
+function ajn_recorder_perm() {
+  return array('limited video submissions', );
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for the brightcove_admin_settings form.
+ */
+function aje_recorder_brightcove_admin_settings_alter(&$form, &$form_state) {
+
+  // Hack to work aronnd submission buttons being added to form too early
+  $form['buttons']['#weight'] = 10;
+
+  $form['ajn_recorder'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Post Submission'),
+    '#collapsed' => FALSE,
+    '#collapsible' => TRUE,
+    '#weight' => 5,
+  );
+  $form['ajn_recorder']['ajn_recorder_redirect'] = array(
+    '#type'  => 'textfield',
+    '#title' => t('Submission Redirect URL'),
+    '#default_value' => variable_get('ajn_recorder_redirect', variable_get('site_frontpage', 'node')),
+    '#description' => t("The URL users are redirected to after submitting video."),
+    '#required' => TRUE,
+  );
+
+  $form['#validate'][] = 'aje_recorder_form_brightcove_admin_settings_validate';
+}
+
+/**
+ * Validate extra values in brightcove admin form.
+ */
+function aje_recorder_form_brightcove_admin_settings_validate($form, &$form_state) {
+
+  // Validate redirect path - lifted from site-information validator.
+  $item = array('ajn_recorder_redirect' => $form_state['values']['ajn_recorder_redirect']);
+  $normal_path = drupal_get_normal_path($item['ajn_recorder_redirect']);
+  if ($item['ajn_recorder_redirect'] != $normal_path) {
+    drupal_set_message(t('The menu system stores system paths only, but will use the URL alias for display. %link_path has been stored as %normal_path', array('%link_path' => $item['ajn_recorder_redirect'], '%normal_path' => $normal_path)));
+    $item['ajn_recorder_redirect'] = $normal_path;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function ajn_recorder_form_alter(&$form, &$form_state, $form_id) {
+
+  if('brightcove_admin_settings' == $form_id) {
+    return aje_recorder_brightcove_admin_settings_alter($form, $form_state);
+  }
+
+  if (!isset($form['#node']) || !isset($form['type']['#value']) 
+    || $form_id != $form['type']['#value'] .'_node_form') {
+    return;
+  }
+
+  foreach ($form['#field_info'] as $name => $field) {
+    if ($field['type'] != 'brightcove_video') {
+      continue;
+    }
+
+    if (!isset($form['#after_build'])) {
+      $form['#after_build'] = array();
+    }
+ 
+    $form['#after_build'][] = 'ajn_recorder_node_form_after_build';
+    // we only call after_build once regardless of how many brightcove fields in form
+    return;
+  }
+}
+
+/**
+ * Implements form after_build callback.
+ */
+function ajn_recorder_node_form_after_build($form, &$form_state) {
+
+  if (!user_access('limited video submissions') 
+    || !user_access('record video')) {
+    return $form;
+  }
+
+  foreach ($form['#field_info'] as $name => $field) {
+    if ($field['type'] != 'brightcove_video') {
+      continue;
+    }
+
+    $count = $field['multiple'];
+    if ($count <= 1) {
+      ++$count;
+    }
+
+    for ($i = 0; $i < $count; ++$i) {
+      $form[$name][$i]['video_id']['#type'] = 'hidden';
+      unset($form[$name][$i]['actions']['browse']);
+      unset($form[$name][$i]['actions']['remove']);
+      // FIXME work out how to handle deletions
+    }
+
+    $form['#redirect'] = array(variable_get('ajn_recorder_redirect', 'node'));
+  }
+  return $form;
+}
+

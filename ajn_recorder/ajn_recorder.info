@@ -1,0 +1,6 @@
+name = Al Jazeera Video Recorder
+description = Al Jazeera specific modification to the video recorder module
+core = 6.x
+package = " Al Jazeera"
+
+dependencies[] = brightcove_recorder
