@@ -82,7 +82,7 @@ function video_recorder_admin() {
 }
 
 /**
- * Validate user input for video recorder admin.
+ * Validate user input for video recorder admin form.
  */
 function video_recorder_admin_validate($form, &$form_state) {
   /*
