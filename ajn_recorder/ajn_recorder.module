@@ -12,7 +12,7 @@ function ajn_recorder_perm() {
  */
 function aje_recorder_brightcove_admin_settings_alter(&$form, &$form_state) {
 
-  // Hack to work aronnd submission buttons being added to form too early
+  // Stop submission buttons being added to form too early.
   $form['buttons']['#weight'] = 10;
 
   $form['ajn_recorder'] = array(
@@ -25,7 +25,7 @@ function aje_recorder_brightcove_admin_settings_alter(&$form, &$form_state) {
   $form['ajn_recorder']['ajn_recorder_redirect'] = array(
     '#type'  => 'textfield',
     '#title' => t('Submission Redirect URL'),
-    '#default_value' => variable_get('ajn_recorder_redirect', variable_get('site_frontpage', 'node')),
+    '#default_value' => variable_get('ajn_recorder_redirect', '<front>'),
     '#description' => t("The URL users are redirected to after submitting video."),
     '#required' => TRUE,
   );
@@ -36,14 +36,14 @@ function aje_recorder_brightcove_admin_settings_alter(&$form, &$form_state) {
 /**
  * Validate extra values in brightcove admin form.
  */
-function aje_recorder_form_brightcove_admin_settings_validate($form, &$form_state) {
+function aje_recorder_form_brightcove_admin_settings_validate(&$form, &$form_state) {
 
   // Validate redirect path - lifted from site-information validator.
   $item = array('ajn_recorder_redirect' => $form_state['values']['ajn_recorder_redirect']);
   $normal_path = drupal_get_normal_path($item['ajn_recorder_redirect']);
   if ($item['ajn_recorder_redirect'] != $normal_path) {
     drupal_set_message(t('The menu system stores system paths only, but will use the URL alias for display. %link_path has been stored as %normal_path', array('%link_path' => $item['ajn_recorder_redirect'], '%normal_path' => $normal_path)));
-    $item['ajn_recorder_redirect'] = $normal_path;
+    $form_state['values']['ajn_recorder_redirect'] = $normal_path;
   }
 }
 
@@ -100,10 +100,10 @@ function ajn_recorder_node_form_after_build($form, &$form_state) {
       $form[$name][$i]['video_id']['#type'] = 'hidden';
       unset($form[$name][$i]['actions']['browse']);
       unset($form[$name][$i]['actions']['remove']);
-      // FIXME work out how to handle deletions
+      // FIXME work out how to handle delete/undo action
     }
 
-    $form['#redirect'] = array(variable_get('ajn_recorder_redirect', 'node'));
+    $form['#redirect'] = array(variable_get('ajn_recorder_redirect', '<front>'));
   }
   return $form;
 }
