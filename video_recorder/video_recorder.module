@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * @file Video Recorder module.
+ */
+
+/**
  * The default RTMP URL for recording the video streams.
  */
 define('VIDEO_RECORDER_DEFAULT_RTMP_URL', 'rtmp://localhost/dvr/');
@@ -35,7 +39,15 @@ define('VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME', 2);
  */
 define('VIDEO_RECORDER_DEFAULT_CAMERA_LENGTH', 600);
 
+/**
+ * The height of the video recorder object in pixels.
+ */
+define('VIDEO_RECORDER_DEFAULT_HEIGHT', 480);
 
+/**
+ * The width of the video recorder object in pixels.
+ */
+define('VIDEO_RECORDER_DEFAULT_WIDTH', 640);
 
 /**
  * Implements hook_menu().
@@ -87,16 +99,7 @@ function video_recorder_recorder($video_id) {
   $base = drupal_get_path('module', 'video_recorder');
   drupal_add_js("{$base}/video_recorder.js");
 
-  $options = array(
-    'id'          => 'video-recorder',
-    'rtmp_url'    => NULL,
-    'bandwidth'   => NULL,
-    'compression' => NULL,
-    'fps'         => NULL,
-    'kfs'         => NULL,
-    'length'      => NULL,
-  );
-
+  $options = video_recorder_defaults();
   return theme('video_recorder_recorder', $video_id, $options);
 }
 
@@ -170,39 +173,33 @@ function video_recorder_theme($existing, $type, $theme, $path) {
 function theme_video_recorder_recorder($video_id, $options=array()) {
   global $base_path;
 
-  if ($options['id'] === NULL) {
-    $options['id'] = 'video-recorder';
-  }
-  if ($options['rtmp_url'] === NULL) {
-    $options['rtmp_url'] = variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL);
-  }
-  if ($options['bandwidth'] === NULL) {
-    $options['bandwidth'] = variable_get('video_recorder_camera_bandwidth', VIDEO_RECORDER_DEFAULT_CAMERA_BANDWIDTH);
-  }
-  if ($options['compression'] === NULL) {
-    $options['compression'] = variable_get('video_recorder_camera_compression', VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION);
-  }
-  if ($options['fps'] === NULL) {
-    $options['fps'] = variable_get('video_recorder_camera_fps', VIDEO_RECORDER_DEFAULT_CAMERA_FPS);
-  }
-  if ($options['kfs'] === NULL) {
-    $options['kfs'] = variable_get('video_recorder_camera_keyframe', VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME);
-  }
-  if ($options['length'] === NULL) {
-    $options['length'] = variable_get('video_recorder_camera_length', VIDEO_RECORDER_DEFAULT_CAMERA_LENGTH);
-  }
-
   $video_id     = check_plain($video_id);
   $id           = check_plain($options['id']);
-  $rtmp_url     = check_plain($options['rtmp_url']);
-  $bandwidth    = check_plain($options['bandwidth']);
-  $compression  = check_plain($options['compression']);
   $fps          = (int) $options['fps'];
   $kfs          = (int) $options['kfs'];
   $length       = (int) $options['length'];
 
-  // calculate number of frames between each keyframe based on current FPS
-  $keyframe = $fps * $kfs;
+  $flash_vars = http_build_query(array(
+    'backText' => $options['back'],
+    'bandwidth' => (int) $bandwidth,
+    'compression' => (int) $options['compression'],
+    'fps' => $fps,
+    'height' => (int) $options['height'],
+    // calculate number of frames between each keyframe based on current FPS
+    'keyframe' => $fps * $kfs,
+    'maxLength' => (int) $options['length'],
+    'playText' => check_plain($options['play']),
+    'recording' => check_plain($options['recording']),
+    'recordTooltipText' => check_plain($options['record_tooltip']),
+    'recText' => check_plain($options['rec']),
+    'reviewTooltipText' => check_plain($options['review_tooltip']),
+    'settingsText' => check_plain($options['settings']),
+    'server' => check_plain($options['rtmp_url']),
+    'stop' => check_plain($options['stop']),
+    'timeLeftText' => check_plain($options['time_left']),
+    'volume' => check_plain($options['volume']),
+    'width' => (int) $options['width'],
+  ));
 
   $recorder = $base_path . drupal_get_path('module', 'video_recorder') . '/recorder.swf';
 
@@ -216,11 +213,11 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
         <param name="quality" value="high" />
         <param name="bgcolor" value="#ffffff" />
         <param name="allowScriptAccess" value="sameDomain" />
-        <param name="FlashVars" value="server={$rtmp_url}&fileName={$video_id}&height=480&width=640&maxLength={$length}&bandwidth={$bandwidth}&compression={$compression}&fps={$fps}&keyframe={$keyframe}" />
+        <param name="FlashVars" value="{$flash_vars}" />
         <embed src="{$recorder}" quality="high" bgcolor="#ffffff" width="640" height="480" name="recorder" align="middle" 
           play="true" loop="false" quality="high" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" 
           pluginspage="http://www.adobe.com/go/getflashplayer" 
-          FlashVars="server={$rtmp_url}&fileName={$video_id}&height=480&width=640&maxLength={$length}&bandwidth={$bandwidth}&compression={$compression}&fps={$fps}&keyframe={$keyframe}">
+          FlashVars="{$flash_vars}">
         </embed>
       </object>
     </div>
@@ -232,4 +229,32 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
 HTML;
 
   return $content;
+}
+
+/**
+ * Prepares the default configuration options for the record object.
+ */
+function video_recorder_defaults() {
+  $options = array(
+    'id' => 'video-recorder',
+    'back' => t('Back'),
+    'bandwidth' => variable_get('video_recorder_camera_bandwidth', VIDEO_RECORDER_DEFAULT_CAMERA_BANDWIDTH),
+    'compression' => variable_get('video_recorder_camera_compression', VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION),
+    'fps' => variable_get('video_recorder_camera_fps', VIDEO_RECORDER_DEFAULT_CAMERA_FPS),
+    'height' => VIDEO_RECORDER_DEFAULT_HEIGHT,
+    'kfs' => variable_get('video_recorder_camera_keyframe', VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME),
+    'length' => variable_get('video_recorder_camera_length', VIDEO_RECORDER_DEFAULT_CAMERA_LENGTH),
+    'play' => t('Review'),
+    'rec' => t('Rec'),
+    'recording' => t('Recording ...'),
+    'record_tooltip' => t('Start / stop recording'),
+    'review_tooltip' => t('Review recording'),
+    'rtmp_url' => variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL),
+    'settings' => t('Settings'),
+    'stop' => t('Stop'),
+    'time_left' => t('Time Left:'),
+    'width' => VIDEO_RECORDER_DEFAULT_WIDTH,
+  );
+
+  return $options;
 }
