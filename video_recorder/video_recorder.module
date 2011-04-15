@@ -181,7 +181,7 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
 
   $flash_vars = http_build_query(array(
     'backText' => $options['back'],
-    'bandwidth' => (int) $bandwidth,
+    'bandwidth' => (int) $options['bandwidth'],
     'compression' => (int) $options['compression'],
     'fps' => $fps,
     'height' => (int) $options['height'],
@@ -197,7 +197,7 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
     'server' => check_plain($options['rtmp_url']),
     'stop' => check_plain($options['stop']),
     'timeLeftText' => check_plain($options['time_left']),
-    'volume' => check_plain($options['volume']),
+    'volumeText' => check_plain($options['volume']),
     'width' => (int) $options['width'],
   ));
 
@@ -253,6 +253,7 @@ function video_recorder_defaults() {
     'settings' => t('Settings'),
     'stop' => t('Stop'),
     'time_left' => t('Time Left:'),
+    'volume' => t('Volume'),
     'width' => VIDEO_RECORDER_DEFAULT_WIDTH,
   );
 
