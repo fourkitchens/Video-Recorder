@@ -1,0 +1,57 @@
+/* CSS file */
+.playButton { 
+	down-icon: Embed(source="assets/player_pause.png"); 
+	over-icon: Embed(source="assets/player_pause.png"); 
+	up-icon: Embed(source="assets/player_pause.png"); 
+	
+	selected-disabled-icon: Embed(source="assets/player_play.png"); 
+	selected-over-icon: Embed(source="assets/player_play.png");
+	selected-up-icon: Embed(source="assets/player_play.png");
+}
+.recordButton {
+	selected-disabled-icon: Embed(source="assets/player_pause.png"); 
+	selected-over-icon: Embed(source="assets/player_pause.png");
+	selected-up-icon: Embed(source="assets/player_pause.png");
+	
+	down-icon: Embed(source="assets/rec32.png");
+	over-icon: Embed(source="assets/rec32.png"); 
+	up-icon: Embed(source="assets/rec32.png"); 
+}
+
+.scrollBar {
+	thumb-icon: Embed(source="assets/circle.png"); 
+	thumb-up-skin: Embed(source="assets/circle.png"); 
+	thumb-down-skin: Embed(source="assets/circle.png"); 
+	thumb-over-skin: Embed(source="assets/circle.png"); 
+}		
+ToolTip {
+	backgroundAlpha: 0.8;
+	backgroundColor: #000;
+	borderStyle: solid;
+	color: white;
+	cornerRadius: 5;
+	fontFamily: Arial;
+	font-size: 13;
+}
+
+HSlider {
+	
+	dataTipPlacement: right;
+	dataTipOffset: 0;
+}
+.arial16E {
+	fontFamily: Arial;
+	fontSize: 16;
+}
+.arial14E {
+	fontFamily: Arial;
+	fontSize: 14;
+}        
+.arial12E {
+	fontFamily: Arial;
+	fontSize: 12;
+}
+.arial10E {
+	fontFamily: Arial;
+	fontSize: 10;
+}

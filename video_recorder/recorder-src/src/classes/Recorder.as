@@ -18,6 +18,18 @@ package classes
 		public var backToRecorder:Boolean=true;
 		public var backText:String="Back";
 		public var cameraDetected:Boolean=false;
+
+		// Drupal module extensions
+		public var bandwidth:int=0;
+		public var compression:int=70;
+		public var keyframe:int=30; // every 2 seconds @ 15fps (default)
+		public var playText:String="Play";
+		public var recText:String="Rec";
+		public var recordTooltipText:String="Start / stop recording";
+		public var reviewTooltipText:String="Review recording";
+		public var settingsText:String="Settings";
+		public var stopText:String="Stop";
+		public var volumeText:String="Volume";
 		
 		public function Recorder()
 		{	timeLeft = maxLength;
@@ -28,6 +40,5 @@ package classes
 			this.height = height;
 			this.server = server;*/
 		}
-
 	}
 }

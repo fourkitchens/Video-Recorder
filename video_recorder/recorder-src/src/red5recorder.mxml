@@ -4,7 +4,6 @@
 		<mx:State name="player">
 			<mx:RemoveChild target="{myWebcam}"/>
 			<mx:RemoveChild target="{cam1_btn}"/>
-			<mx:RemoveChild target="{blink1}"/>
 			<mx:RemoveChild target="{canvas1}"/>
 			<mx:RemoveChild target="{micLevel}"/>
 			<mx:AddChild relativeTo="{canvas2}" position="lastChild">
@@ -46,15 +45,17 @@
 
 		<mx:Canvas label="recorder" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off" id="canvas2">
 			<mx:VideoDisplay id="myWebcam" left="0" top="0" bottom="16" right="0"/>
-			<mx:Button y="0" icon="@Embed('assets/webcamON.png')" height="18" width="35"
-				id="cam1_btn" click="webcamParameters()" toolTip="Parameters" label="1" x="0"/>
-			<mx:ProgressBar label="volume" labelPlacement="center" minimum="0" maximum="100" id="micLevel" mode="manual" visible="{myRecorder.showVolume}" bottom="0" right="0" left="0"/>
-			<mx:Canvas height="36" cornerRadius="5" borderStyle="solid" borderColor="#000000" backgroundColor="#FFFFFF" backgroundAlpha="0.5" alpha="0.6" id="canvas1" left="0" right="0" bottom="16">
-				<mx:Button label="Rec" toggle="true" width="84" height="33" icon="@Embed(source='assets/rec32.png')" top="0" id="rec_btn" click="recClicked()" toolTip="Click here to START/STOP recording" visible="{myRecorder.cameraDetected}"/>
-				<mx:Label x="184" y="6" text="{myRecorder.timeLeftText} {timeLeft}" width="124" color="#000000"/>
-				<mx:Button label="play" width="84" height="33" icon="@Embed(source='assets/player_play.png')" top="0" id="replay_btn" click="replay()" toolTip="Click here to START/STOP recording" x="92" visible="{myRecorder.hasRecorded}"/>
+			<mx:Canvas  visible="{rec_btn.selected}" right="0" top="0" backgroundColor="#000000" backgroundAlpha="0.7" width="100%">
+				<mx:Text width="100%" text="{myRecorder.recordingText}" color="#ffffff" textAlign="right" id="recordingStatus" />
 			</mx:Canvas>
-			<ns1:Blink y="0" width="217" text="{myRecorder.recordingText}" color="#FC0000" interval="1000" textAlign="right" fontWeight="bold" displayed="{rec_btn.selected}" id="blink1" right="0"/>
+			<mx:Button y="0" icon="@Embed('assets/webcamON.png')" height="18" width="35"
+				id="cam1_btn" click="webcamParameters()" toolTip="{myRecorder.settingsText}" label="1" x="0"/>
+			<mx:ProgressBar label="{myRecorder.volumeText}" labelPlacement="center" minimum="0" maximum="100" id="micLevel" mode="manual" visible="{myRecorder.showVolume}" bottom="0" right="0" left="0"/>
+			<mx:Canvas height="36" cornerRadius="5" borderStyle="solid" borderColor="#000000" backgroundColor="#FFFFFF" backgroundAlpha="0.5" alpha="0.6" id="canvas1" left="0" right="0" bottom="16">
+				<mx:Button label="{myRecorder.recText}" toggle="true" width="100" height="33" top="0" id="rec_btn" click="recClicked()" toolTip="{myRecorder.recordTooltipText}" visible="{myRecorder.cameraDetected}" styleName="recordButton"/>
+				<mx:Label right="5" y="6" text="{myRecorder.timeLeftText} {timeLeft}" color="#000000"/>
+				<mx:Button label="{myRecorder.playText}" width="100" height="33" icon="@Embed(source='assets/player_play.png')" top="0" id="replay_btn" click="replay()" toolTip="{myRecorder.reviewTooltipText}" x="115" visible="{myRecorder.hasRecorded}"/>
+			</mx:Canvas>
 		</mx:Canvas>
 		
 
