@@ -1,7 +1,7 @@
 diff --git a/sites/all/modules/contrib/modalframe/modalframe.module b/sites/all/modules/contrib/modalframe/modalframe.module
 index d14db98..f43f06a 100644
---- a/sites/all/modules/contrib/modalframe/modalframe.module
-+++ b/sites/all/modules/contrib/modalframe/modalframe.module
+--- modalframe.module.orig
++++ modalframe.module
 @@ -237,8 +237,9 @@ function modalframe_child_js() {
    }
    $processed = TRUE;
