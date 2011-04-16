@@ -1,0 +1,27 @@
+Webcam recording functionality developed by Four Kitchens for for Al Jazeera.
+
+INSTALL GUIDE
+
+Drupal Code Install
+
+* Run the drush make file which is stored in the root directory
+
+* Once the build is complete remove the patches sub directory from sites/all/modules/custom/ajn
+
+Note: The recorder and scripts directory are used by AFMS and can be deleted from the Drupal site once deployed to AFMS.
+
+Drupal Config
+
+* Install Pressflow as per normal
+
+* Enable the ajn_recorder module (optionally enable the admin module)
+
+* Configure the video_recorder and brightcove modules under admin/settings
+
+* Create a new content type and add a brightcove_cck field
+
+AFMS Setup
+
+* Copy the sites/all/modules/custom/ajn/recorder directory to under the /mnt/applications/ directory on the AFMS
+
+* The cleanup.sh script in sites/all/modules/custom/ajn/scripts can be run periodically to remove old video files from the server.  The EC2 instances of AFMS don't have cron installed by default.
