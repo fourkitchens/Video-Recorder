@@ -45,6 +45,4 @@ libraries[jquery_ui][directory_name] = "jquery.ui"
 libraries[jquery_ui][destination] = "modules/contrib/jquery_ui"
 
 libraries[brightcove][download][type] = "get"
-libraries[brightcove][download][url] = "http://download.github.com/BrightcoveOS-PHP-MAPI-Wrapper-2.0.4-0-g237c407.tar.gz"
-libraries[brightcove][download][md5] = "fd5640f1db55d66579a1afe8376d6dc3"
-
+libraries[brightcove][download][url] = "https://github.com/downloads/BrightcoveOS/PHP-MAPI-Wrapper/BrightcoveOS-PHP-MAPI-Wrapper-2.0.5.zip"
