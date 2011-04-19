@@ -183,6 +183,7 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
     'backText' => $options['back'],
     'bandwidth' => (int) $options['bandwidth'],
     'compression' => (int) $options['compression'],
+    'fileName' => $video_id,
     'fps' => $fps,
     'height' => (int) $options['height'],
     // calculate number of frames between each keyframe based on current FPS
