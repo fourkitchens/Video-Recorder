@@ -103,6 +103,7 @@ function ajn_recorder_node_form_after_build($form, &$form_state) {
       if (!$multiple) {
         $form[$name][$i]['actions']['#type'] = 'fieldset';
         $form[$name][$i]['actions']['#title'] = $form[$name]['#title'];
+        $form[$name][$i]['actions']['#attributes'] = array();
       }
       $form[$name][$i]['video_id']['#type'] = 'hidden';
       unset($form[$name][$i]['actions']['browse']);
