@@ -31,7 +31,7 @@ projects[modalframe][patch][admin-fix][md5] = "45405c28d971bace4408fe57fe5eaa69"
 projects[brightcove][type] = "module"
 projects[brightcove][download][type] = "git"
 projects[brightcove][download][url] = "http://git.drupal.org/project/brightcove.git"
-projects[brightcove][download][revision] = "1308219"
+projects[brightcove][download][revision] = "5532a91"
 projects[brightcove][subdir] = "patched"
 
 projects[ajn][type] = "module"
@@ -40,7 +40,7 @@ projects[ajn][download][url] = "git@github.com:aljazeera/AJ-Sharek.git"
 projects[ajn][subdir] = "custom"
 
 libraries[jquery_ui][download][type] = "get"
-libraries[jquery_ui][download][url] = "http://jquery-ui.googlecode.com/files/jquery-ui-1.7.zip"
+libraries[jquery_ui][download][url] = "http://jquery-ui.googlecode.com/files/jquery.ui-1.6.zip"
 libraries[jquery_ui][directory_name] = "jquery.ui"
 libraries[jquery_ui][destination] = "modules/contrib/jquery_ui"
 
