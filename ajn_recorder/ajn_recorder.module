@@ -1,13 +1,6 @@
 <?php
 
 /**
- * Implements hook_perm().
- */
-function ajn_recorder_perm() {
-  return array('limited video submissions', );
-}
-
-/**
  * Implements hook_form_FORM_ID_alter() for the brightcove_admin_settings form.
  */
 function aje_recorder_brightcove_admin_settings_alter(&$form, &$form_state) {
@@ -83,8 +76,7 @@ function ajn_recorder_form_alter(&$form, &$form_state, $form_id) {
  */
 function ajn_recorder_node_form_after_build($form, &$form_state) {
 
-  if (!user_access('limited video submissions') 
-    || !user_access('record video')) {
+  if (!user_access('record video')) {
     return $form;
   }
 
@@ -106,9 +98,8 @@ function ajn_recorder_node_form_after_build($form, &$form_state) {
         $form[$name][$i]['actions']['#attributes'] = array();
       }
       $form[$name][$i]['video_id']['#type'] = 'hidden';
-      unset($form[$name][$i]['actions']['browse']);
-      unset($form[$name][$i]['actions']['remove']);
       // FIXME work out how to handle delete/undo action
+      unset($form[$name][$i]['actions']['remove']);
     }
   }
   return $form;
