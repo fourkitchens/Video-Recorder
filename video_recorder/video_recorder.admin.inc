@@ -82,6 +82,21 @@ function video_recorder_admin() {
     '#required'       => TRUE,
   );
 
+  $form['video_recorder_thumbnail'] = array(
+    '#type'           => 'fieldset',
+    '#title'          => t('Thumbnail Settings'),
+    '#collapsed'      => FALSE,
+    '#collapsible'    => FALSE,
+  );
+  $form['video_recorder_thumbnail']['video_recorder_thumbnail_preset'] = array(
+    '#type'           => 'select',
+    '#title'          => t('Image Cache Preset'),
+    '#default_value'  => variable_get('video_recorder_thumbnail_preset', VIDEO_RECORDER_DEFAULT_THUMBNAIL_PRESET),
+    '#description'    => t("The image cache preset to be used for generating the Thumbnail image."),
+    '#options'        => _video_recorder_admin_get_presets(),
+    '#required'       => TRUE,
+  );
+
   return system_settings_form($form);
 }
 
@@ -109,4 +124,14 @@ function video_recorder_admin_validate($form, &$form_state) {
   if ($form_state['values']['video_recorder_camera_compression'] < 0 || $form_state['values']['video_recorder_camera_compression'] > 100) {
     form_set_error('video_recorder_camera_compression', t('Compression quality must be a number from 0 to 100.'));
   }
+}
+
+function _video_recorder_admin_get_presets() {
+  module_load_include('module', 'imagecache');
+
+  $presets = array();
+  foreach (imagecache_presets() as $name => $data) {
+    $presets[$data['presetid']] = check_plain($name);
+  }
+  return $presets;
 }

@@ -21,8 +21,10 @@ Drupal.behaviors.brightcoveRecorderAttachActions = function(context) {
           $('.throbber').show();
 	  $.post(requestURL, '', function(data) {
 	    if (data.brightcove_id) {
-	      var target = $('input.brightcove-video-' + videoId, window.parent.document);
-	      $('input.brightcove-video-' + videoId, window.parent.document).val('[id:' + data.brightcove_id + ']');
+	      var input = $('input.brightcove-video-' + videoId, window.parent.document),
+                thumbnail = $('#brightcove-recorder-thumbnail-' + videoId, window.parent.document);
+	      input.val('[id:' + data.brightcove_id + ']');
+              thumbnail.html('<img src="' + Drupal.settings.basePath + 'video_recorder/thumbnail/' + videoId + '"/>');
 	      window.parent.Drupal.modalFrame.close();
 	      return false;
 	    }

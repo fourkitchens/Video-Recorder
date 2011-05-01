@@ -67,7 +67,7 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
     }
 
     for ($i = 0; $i < $count; ++$i) {
-      $video_id = sha1(brightcove_recorder_random_bytes(128));
+      $video_id = video_recorder_generate_id();
 
       $button = array(
         'record' => array(
@@ -85,6 +85,13 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
         $form[$name][$i]['actions'] = $button;
       }
       $form[$name][$i]['video_id']['#attributes']['class'] .= " brightcove-video-{$video_id}";
+
+      $thumbnail = array(
+        'thumbnail' => array(
+          '#value' => '<span id="brightcove-recorder-thumbnail-' . $video_id . '" class="recorder-thumbail"></span>',
+        ),
+      );
+      $form[$name][$i]['actions'][] = $thumbnail;
     }
   }
   return $form;
@@ -148,6 +155,11 @@ function brightcove_recorder_random_bytes($count) {
  * Handles transfering video from flash server to brightcove.
  */
 function brightcove_recorder_upload($video_id) {
+
+  if(!video_recorder_verify_id($video_id)) {
+    drupal_set_header('Status: 404 Not Found');
+    return drupal_json(array('error' => 'Invalid video ID.'));
+  }
 
   $video_url = video_recorder_playback_http_url($video_id);
 

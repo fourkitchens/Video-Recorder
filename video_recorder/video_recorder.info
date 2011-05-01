@@ -3,3 +3,5 @@ description = Records video using flash and store it on a flash media server.  B
 core = 6.x
 package = Video
 php = 5.2
+
+dependencies[] = imagecache

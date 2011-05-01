@@ -9,12 +9,16 @@ import flash.utils.Timer;
 import mx.controls.Alert;
 import mx.core.Application;
 
+import mx.graphics.codec.PNGEncoder;
+
+import flash.display.Bitmap;
+import flash.display.BitmapData;
 
 NetConnection.defaultObjectEncoding = flash.net.ObjectEncoding.AMF3;
 SharedObject.defaultObjectEncoding  = flash.net.ObjectEncoding.AMF3;
 
 public var nc:NetConnection;
-public var ns:NetStream;					//
+public var ns:NetStream;
 [Bindable] public var so_chat:SharedObject;
 public var camera:Camera;
 public var mic:Microphone;
@@ -25,6 +29,8 @@ public const ROOMMODEL:String="models";
 public var DEBUG:Boolean=false;
 public var recordingTimer:Timer = new Timer( 1000 , 0 );
 [Bindable] public var timeLeft:String="";
+
+public var thumbnailBytes:ByteArray;
 
 public function init():void {
 	myRecorder = new Recorder();
@@ -55,12 +61,13 @@ public function init():void {
 	if(Application.application.parameters.reviewTooltipText!=null) myRecorder.reviewTooltipText= Application.application.parameters.reviewTooltipText;
 	if(Application.application.parameters.settingsText!=null) myRecorder.settingsText= Application.application.parameters.settingsText;
 	if(Application.application.parameters.stopText!=null) myRecorder.stopText= Application.application.parameters.stopText;
+	if(Application.application.parameters.thumbnailSaveURL!=null) myRecorder.thumbnailSaveURL= Application.application.parameters.thumbnailSaveURL;
 	if(Application.application.parameters.volumeText!=null) myRecorder.volumeText= Application.application.parameters.volumeText;
 
 	Application.application.width = myRecorder.width;
 	Application.application.height = myRecorder.height;
 
-	recordingTimer.addEventListener( "timer" , decrementTimer );
+	recordingTimer.addEventListener("timer" , decrementTimer);
 
 	timeLeft = myRecorder.maxLength.toString();
   	nc=new NetConnection();		
@@ -81,26 +88,32 @@ public function init():void {
 private function recClicked():void { 
 	if (rec_btn.selected) {
 		recordingTimer.start();
+		captureThumbnail();
 		recordStart();
 	}
 	if (!rec_btn.selected) {
 		recordingTimer.stop();
 		recordFinished();
+		publishThumbnail();
 	}
 }
+
 private function videoIsComplete():void {
 	playPauseBut.selected=true;
 	playPause();
 }
+
 private function thumbClicked(e:MouseEvent):void {
 	videoPlayer.playheadTime = position.value;	
 }
+
 public function stopVideo():void {
 	var s:String = myRecorder.server+myRecorder.fileName+".flv";
 	videoPlayer.source = s;
 	videoPlayer.stop();
 	playPauseBut.selected = false;
 }
+
 private function replay():void {
 	rec_btn.selected=false;
 	recClicked();
@@ -119,6 +132,7 @@ private function playPause():void{
 		videoPlayer.play();
 	}
 }
+
 private function thumbPressed():void {
 	playPauseBut.selected=true;
 	videoPlayer.pause();
@@ -137,36 +151,43 @@ private function thumbReleased():void {
 	}
 }
 
- private function formatPositionToolTip(value:Number):String{
+private function formatPositionToolTip(value:Number):String{
 	return value.toFixed(2) +" s";
- }
+}
+
 private function handleGaugeEvent( event:GaugeEvent ) : void{	
 	videoPlayer.volume = event.value/100;
 }
+
 private function rollOut(e:MouseEvent):void {
 }
+
 private function rollOver(e:MouseEvent):void {
 } 
+
 private function netStatusHandler(event:NetStatusEvent):void {
 	switch (event.info.code) {
-	case "NetConnection.Connect.Failed":
-		Alert.show("ERROR:Could not connect to: "+myRecorder.server);
-	break;	
-    case "NetConnection.Connect.Success":
-    	prepareStreams();
-    break;
-	default:
-		nc.close();
-		break;
-    }
+		case "NetConnection.Connect.Failed":
+			Alert.show("ERROR:Could not connect to: "+myRecorder.server);
+			break;	
+		case "NetConnection.Connect.Success":
+			prepareStreams();
+			break;
+		default:
+			nc.close();
+			break;
+	}
 }
+
 public function recordStart():void {
 	nsOutGoing.publish(myRecorder.fileName, "record");
 	myRecorder.hasRecorded = true;
 }
+
 public function recordFinished():void {
 	nsOutGoing.close();
 }
+
 private  function decrementTimer( event:TimerEvent ):void {
 	var minutes:int;
 	var seconds:int;
@@ -186,6 +207,7 @@ private  function decrementTimer( event:TimerEvent ):void {
 public function webcamParameters():void {
 	Security.showSettings(SecurityPanel.DEFAULT);
 }
+
 private function drawMicLevel(evt:TimerEvent):void {
 		var ac:int=mic.activityLevel;
 		micLevel.setProgress(ac,100);
@@ -197,18 +219,17 @@ private  function prepareStreams():void {
 	if (camera==null) {
 		Alert.show("Webcam not detected !");
 	}
-	if (camera!=null) {
-		if (camera.muted) 	{
-			Security.showSettings(SecurityPanel.DEFAULT);
-		}
-		camera.setQuality(myRecorder.bandwidth,myRecorder.compression);
-		camera.setMode(myRecorder.width,myRecorder.height,myRecorder.fps);
-		camera.setKeyFrameInterval(myRecorder.keyframe);
-		myWebcam.attachCamera(camera);
-		nsOutGoing.attachCamera(camera);
-		myRecorder.cameraDetected=true;
-		camera.addEventListener(StatusEvent.STATUS, cameraStatus); 
-	}	
+
+	if (camera.muted) 	{
+		Security.showSettings(SecurityPanel.DEFAULT);
+	}
+	camera.setQuality(myRecorder.bandwidth,myRecorder.compression);
+	camera.setMode(myRecorder.width,myRecorder.height,myRecorder.fps);
+	camera.setKeyFrameInterval(myRecorder.keyframe);
+	myWebcam.attachCamera(camera);
+	nsOutGoing.attachCamera(camera);
+	myRecorder.cameraDetected=true;
+	camera.addEventListener(StatusEvent.STATUS, cameraStatus); 
 
 	mic=Microphone.getMicrophone(0);
 	if (mic!=null) {
@@ -218,17 +239,41 @@ private  function prepareStreams():void {
 		timer.start();
 		nsOutGoing.attachAudio(mic);
 	}	
-	//nsInGoing= new NetStream(nc);
-    //nsInGoing.client=this;    
-			            
-}   
+}
+   
 private function cameraStatus(evt:StatusEvent):void {
 	switch (evt.code) {
-	case "Camera.Muted":
-		myRecorder.cameraDetected=false;
-		break;
-	case "Camera.Unmuted":
-    	myRecorder.cameraDetected=true;
-	break;
-    }
-}   
+		case "Camera.Muted":
+			myRecorder.cameraDetected=false;
+			break;
+		case "Camera.Unmuted":
+			myRecorder.cameraDetected=true;
+			break;
+	}
+}
+
+private function captureThumbnail():void {
+	if (!myRecorder.thumbnailSaveURL) {
+		return;
+	}
+
+	var thumbnailData:BitmapData = new BitmapData(myRecorder.width, myRecorder.height);
+	thumbnailData.draw(myWebcam);
+	var imageEncoder:PNGEncoder = new PNGEncoder();
+	thumbnailBytes = imageEncoder.encode(thumbnailData);
+}
+
+private function publishThumbnail():void {
+	if (!myRecorder.thumbnailSaveURL) {
+		return;
+	}
+
+	var header:URLRequestHeader = new URLRequestHeader("Content-type", "image/jpeg");
+	var saveImage:URLRequest = new URLRequest(myRecorder.thumbnailSaveURL + myRecorder.fileName);
+	saveImage.requestHeaders.push(header);
+	saveImage.method = URLRequestMethod.POST;
+	saveImage.data = thumbnailBytes;
+	
+	var urlLoader:URLLoader = new URLLoader();
+	urlLoader.load(saveImage);
+}

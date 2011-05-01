@@ -29,6 +29,7 @@ package classes
 		public var reviewTooltipText:String="Review recording";
 		public var settingsText:String="Settings";
 		public var stopText:String="Stop";
+		public var thumbnailSaveURL:String="";
 		public var volumeText:String="Volume";
 		
 		public function Recorder()
