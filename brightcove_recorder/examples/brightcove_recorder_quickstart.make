@@ -20,6 +20,12 @@ projects[jquery_ui][subdir] = "contrib"
 projects[lightbox2][version] = 1.11
 projects[lightbox2][subdir] = "contrib"
 
+project[imagecache][version] = 6.x-2.0-beta10
+project[imagecache][subdir] = "contrib"
+
+project[imageapi][version] = 6.x-1.9
+project[imageapi][subdir] = "contrib"
+
 ; Don't use a later version of modalframe - it breaks stuff
 projects[modalframe][version] = "1.6"
 projects[modalframe][subdir] = "patched"
