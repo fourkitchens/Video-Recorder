@@ -31,7 +31,8 @@ function brightcove_recorder_form_alter(&$form, &$form_state, $form_id) {
 
   if (!isset($form['#node']) || !isset($form['type']['#value']) 
     || $form_id != $form['type']['#value'] .'_node_form'
-    || !user_access('record video')) {
+    || !user_access('record video')
+    || empty($form['#field_info'])) {
     return;
   }
 
