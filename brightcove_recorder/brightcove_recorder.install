@@ -1,0 +1,81 @@
+<?php
+
+/**
+ * Brightcove recorder install functions.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function brightcove_recorder_schema() {
+  $schema = array();
+  $schema['brightcove_recorder_queue'] = array(
+    'description' => 'Queue for processing delayed birghtcove API actions',
+    'fields' => array(
+      'qid' => array(
+        'description' => 'The id for the item in the queue.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'brightcove_id' => array(
+        'description' => 'The Brightcove studio id for the video.',
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+      ),
+      'action' => array(
+        'description' => 'The action to be performed on queue entry.',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+      ),
+      'video_hash' => array(
+        'description' => 'The name of the file to use with action.',
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => FALSE,
+      ),
+      'queued' => array(
+        'description' => 'The Unix timestamp of when the item was queued.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+    ),
+    'indexes' => array(
+      'brightcove_id' => array('brightcove_id'),
+      'queued' => array('queued'),
+    ),
+    'unique keys' => array(
+      'unique_entry' => array('brightcove_id', 'action', 'queued'),
+    ),
+    'primary key' => array('qid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_install().
+ */
+function brightcove_recorder_install() {
+  drupal_install_schema('brightcove_recorder');
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function brightcove_recorder_uninstall() {
+  drupal_uninstall_schema('brightcove_recorder');
+
+  variable_del('video_recorder_camera_bandwidth');
+  variable_del('video_recorder_camera_compression');
+  variable_del('video_recorder_camera_fps');
+  variable_del('video_recorder_camera_keyframe');
+  variable_del('video_recorder_camera_length');
+  variable_del('video_recorder_http_url');
+  variable_del('video_recorder_rtmp_url');
+  variable_del('video_recorder_thumbnail_preset');
+}
+
