@@ -4,9 +4,22 @@ Drupal.behaviors.brightcoveRecorderAttachActions = function(context) {
       $(this).click(function() {
         var button = $(this),
           idParts = button.attr('id').match(/edit-(.+)-(\d+)-record-(.+)/),
+          fieldName = idParts[1],
           delta = idParts[2],
-          videoId = idParts[3];
+          videoId = idParts[3],
+          rerecord = Drupal.t('Rerecord');
+        if (button.val() == rerecord) {
+          var input = $('#edit-' + fieldName + '-' + delta + '-video-id'),
+            brightcoveId = input.val().match(/\[id:(\d+)\]/);
+          if (null !== brightcoveId && brightcoveId.length) {
+            var requestURL = Drupal.settings.basePath + 'brightcove_recorder/delete/' + brightcoveId[1] + '/' + videoId;
+            $.post(requestURL, '', function(data) {});
+          }
+          $('#brightcove-recorder-thumbnail-' + videoId).html('');
+          input.val('');
+        }
         Drupal.modalFrame.open({url: Drupal.settings.basePath + 'video_recorder/record/popup/' + videoId, width: 700});
+        button.val(rerecord);
         return false;
       })
       .addClass('processed');
@@ -28,7 +41,7 @@ Drupal.behaviors.brightcoveRecorderAttachActions = function(context) {
 	      window.parent.Drupal.modalFrame.close();
 	      return false;
 	    }
-	    window.alert('Unable to save video. Please try again');
+	    window.alert(Drupal.t('Unable to save video. Please try again'));
             $('.throbber').hide();
             return false;
 	  }, 'json');

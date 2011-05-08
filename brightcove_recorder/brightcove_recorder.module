@@ -28,6 +28,15 @@ function brightcove_recorder_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['brightcove_recorder/delete/%/%'] = array(
+    'title' => 'Request deletion of a recorded video',
+    'description' => 'Request deletion of a recorded video from the brightcove server.',
+    'page callback' => 'brightcove_recorder_request_delete',
+    'page arguments' => array(2, 3),
+    'access arguments' => array('record video'),
+    'type' => MENU_CALLBACK,
+  );
+
   return $items;
 }
 
@@ -87,6 +96,8 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
       continue;
     }
 
+    $field_name = str_replace('_', '-', $field['field_name']);
+
     $count = $field['multiple'];
     if ($count <= 1) {
       ++$count;
@@ -99,7 +110,7 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
         'record' => array(
           '#type' => 'brightcove_cck_browse_button',
           '#value' => $record,
-          '#id' => "edit-field-bc-{$i}-record-{$video_id}",
+          '#id' => check_plain("edit-{$field_name}-{$i}-record-{$video_id}"),
           '#attributes' => array('class' => 'brightcove-recorder-record-button'),
           '#tree' => TRUE,
         ),
@@ -177,6 +188,27 @@ function brightcove_recorder_upload($video_id) {
   brightcove_recorder_queue_action($id, 'thumb', $video_id);
 
   return drupal_json(array('brightcove_id' => $id));
+}
+
+/**
+ * Queue a request to delete a video from the brightcove CDN.
+ *
+ * @param
+ *   $id The Brightcove CDN id for the video.
+ * @param
+ *   $hash The Brightcove recorder unique video hash.
+ */
+function brightcove_recorder_request_delete($id, $hash) {
+  if (!video_recorder_id_verify($hash)
+    || is_null(brightcove_video_cache_get($id))) {
+    drupal_set_header('Status: 404 Not Found');
+    return drupal_json(array('error' => 'Invalid video'));
+  }
+
+  // unset the brightcove video id so it is no longer available
+  brightcove_video_cache_set($video_id, NULL);
+  brightcove_recorder_queue_action($id, 'delete');
+  return drupal_json(array('queued', TRUE));
 }
 
 /**
