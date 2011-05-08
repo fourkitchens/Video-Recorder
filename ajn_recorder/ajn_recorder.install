@@ -1,9 +1,16 @@
 <?php
 
 /**
- * Implements hook_install()
+ * Implements hook_install().
  */
 function ajn_recorder_install() {
   $weight = 50; // high but below devel
   db_query("UPDATE {system} SET weight = %d WHERE name = 'ajn_recorder'", $weight);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function ajn_recorder_uninstall() {
+  variable_del('ajn_recorder_redirect');
 }
