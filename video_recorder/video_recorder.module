@@ -4,55 +4,7 @@
  * @file Video Recorder module.
  */
 
-/**
- * The default RTMP URL for recording the video streams.
- */
-define('VIDEO_RECORDER_DEFAULT_RTMP_URL', 'rtmp://localhost/dvr/');
-
-/**
- * The default HTTP URL for fetching recorded video streams.
- */
-define('VIDEO_RECORDER_DEFAULT_HTTP_URL', 'http://localhost:8134/live/dvr/');
-
-/**
- * The default bandwidth limit when recording video.
- */
-define('VIDEO_RECORDER_DEFAULT_CAMERA_BANDWIDTH', 0);
-
-/**
- * The default compression quality when recording video.
- */
-define('VIDEO_RECORDER_DEFAULT_CAMERA_COMPRESSION', 70);
-
-/**
- * Frames per second (FPS) for uploaded videos
- */
-define('VIDEO_RECORDER_DEFAULT_CAMERA_FPS', 30);
-
-/**
- * The number of seconds between each keyframe for uploaded videos.
- */
-define('VIDEO_RECORDER_DEFAULT_CAMERA_KEYFRAME', 2);
-
-/**
- * The maximum length (in seconds) for uploaded videos.
- */
-define('VIDEO_RECORDER_DEFAULT_CAMERA_LENGTH', 600);
-
-/**
- * The height of the video recorder object in pixels.
- */
-define('VIDEO_RECORDER_DEFAULT_HEIGHT', 480);
-
-/**
- * The width of the video recorder object in pixels.
- */
-define('VIDEO_RECORDER_DEFAULT_WIDTH', 640);
-
-/**
- * The default image cache preset for generating thumbnails.
-*/
-define('VIDEO_RECORDER_DEFAULT_THUMBNAIL_PRESET', 'brightcove_browser');
+module_load_include('inc', 'video_recorder');
 
 /**
  * Implements hook_menu().
@@ -110,7 +62,7 @@ function video_recorder_perm() {
  * Records a video using flash.
  */
 function video_recorder_recorder($video_id) {
-  if (!video_recorder_verify_id($video_id)) {
+  if (!video_recorder_id_verify($video_id)) {
     drupal_set_message(t('Invalid video ID.'), 'error');
     return t('ERROR!');
   }
@@ -128,24 +80,6 @@ function video_recorder_recorder($video_id) {
 function video_recorder_recorder_modal($video_id) {
   modalframe_child_js();
   return video_recorder_recorder($video_id);
-}
-
-/**
- * Fetch the HTTP playback URL for a video.
- */
-function video_recorder_playback_http_url($video_id) {
-  $http_url = variable_get('video_recorder_http_url', VIDEO_RECORDER_DEFAULT_HTTP_URL);
-  $url = check_plain($http_url . $video_id . '.flv');
-  return $url;
-}
-
-/**
- * Fetch the RTMP playback URL for a video.
- */
-function video_recorder_playback_http_rtmp($video_id) {
-  $rtmp_url = variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL);
-  $url = check_plain($rtmp_url . $video_id);
-  return $url;
 }
 
 /**
@@ -285,63 +219,19 @@ function video_recorder_defaults() {
 /**
  * Provides a RESTful interface for handling video thumbnail images.
  */
-function video_recorder_thumbnail($filename) {
-  if (!video_recorder_verify_id($filename)) {
+function video_recorder_thumbnail($video_id) {
+  if (!video_recorder_id_verify($video_id)) {
     return;
   }
 
-  $dir = file_directory_path() . '/video_recorder';
-  file_check_directory($dir, FILE_CREATE_DIRECTORY);
-
-  $full_path = "{$dir}/thumb-{$filename}.png";
-
   switch ($_SERVER['REQUEST_METHOD']) {
     default:
-      $preset = variable_get('video_recorder_thumbnail_preset', VIDEO_RECORDER_DEFAULT_THUMBNAIL_PRESET);
-      drupal_goto(imagecache_create_url($preset, $full_path));
+      return drupal_goto(video_recorder_thumbnail_url($video_id));
       break;
 
     case 'POST':
       $image = file_get_contents("php://input");
-      $result = (0 !== file_save_data($image, $full_path, FILE_EXISTS_REPLACE));
+      $result = video_recorder_thumbnail_save($video_id, $image);
       drupal_json(array('result' => $result));
   }
-}
-
-/**
- * Registers a video ID with the recorder.
- */
-function video_recorder_add_id($video_id) {
-  if (!isset($_SESSION['video_recorder']['ids'])
-    || !is_array($_SESSION['video_recorder']['ids'])) {
-    $_SESSION['video_recorder']['ids'] = array();
-  }
-
-  $_SESSION['video_recorder']['ids'][$video_id] = TRUE;
-}
-
-/**
- * Generates a unique video identifier.
- */
-function video_recorder_generate_id() {
-  $id = sha1(brightcove_recorder_random_bytes(128));
-  video_recorder_add_id($id);
-  return $id;
-}
-
-/**
- * Removes a video from the known ID list.
- */
-function video_recorder_remove_id($video_id) {
-  if(!empty($_SESSION['video_recorder']['ids'])) {
-    unset($_SESSION['video_recorder']['ids']);
-  }
-}
-
-/**
- * Verify that a video ID is legitimate.
- */
-function video_recorder_verify_id($video_id) {
-  return isset($_SESSION['video_recorder']['ids'][$video_id])
-    && $_SESSION['video_recorder']['ids'][$video_id];
 }
