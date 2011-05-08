@@ -1,6 +1,20 @@
 <?php
 
 /**
+ * The time to wait before manipulating Brightcove API objects.
+ *
+ * Based on testing 5-6mins is adequate, this gives additional leeway.
+ */
+define('BRIGHTCOVE_RECORDER_API_WAIT', 60 * 10); // 10mins
+
+/**
+ * @file
+ * Brightcove recorder module.
+ */
+
+module_load_include('inc', 'video_recorder');
+
+/**
  * Implements hook_menu().
  */
 function brightcove_recorder_menu() {
@@ -22,6 +36,17 @@ function brightcove_recorder_menu() {
  */
 function brightcove_recorder_init() {
   drupal_add_js(drupal_get_path('module', 'brightcove_recorder') . '/brightcove_recorder.js');
+}
+
+/**
+ * Implements hook_cron().
+ */
+function brightcove_recorder_cron() {
+  $queued_before = time() - BRIGHTCOVE_RECORDER_API_WAIT;
+  $result = db_query('SELECT * FROM {brightcove_recorder_queue} WHERE queued < %d', $queued_before);
+  while ($row = db_fetch_array($result)) {
+    brightcove_recorder_process_item($row);
+  }
 }
 
 /**
@@ -68,7 +93,7 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
     }
 
     for ($i = 0; $i < $count; ++$i) {
-      $video_id = video_recorder_generate_id();
+      $video_id = video_recorder_id_generate();
 
       $button = array(
         'record' => array(
@@ -99,65 +124,12 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
 }
 
 /**
- * Returns a string of highly randomized bytes (over the full 8-bit range).
- *
- * This function is better than simply calling mt_rand() or any other built-in
- * PHP function because it can return a long string of bytes (compared to < 4
- * bytes normally from mt_rand()) and uses the best available pseudo-random source.
- *
- * Copied verbatim from drupal_random_bytes() from D7
- *  @link http://api.drupal.org/api/drupal/includes--bootstrap.inc/function/drupal_random_bytes/7
- *
- * @param $count
- *   The number of characters (bytes) to return in the string.
- */
-function brightcove_recorder_random_bytes($count) {
-  // $random_state does not use drupal_static as it stores random bytes.
-  static $random_state, $bytes;
-  // Initialize on the first call. The contents of $_SERVER includes a mix of
-  // user-specific and system information that varies a little with each page.
-  if (!isset($random_state)) {
-    $random_state = print_r($_SERVER, TRUE);
-    if (function_exists('getmypid')) {
-      // Further initialize with the somewhat random PHP process ID.
-      $random_state .= getmypid();
-    }
-    $bytes = '';
-  }
-  if (strlen($bytes) < $count) {
-    // /dev/urandom is available on many *nix systems and is considered the
-    // best commonly available pseudo-random source.
-    if ($fh = @fopen('/dev/urandom', 'rb')) {
-      // PHP only performs buffered reads, so in reality it will always read
-      // at least 4096 bytes. Thus, it costs nothing extra to read and store
-      // that much so as to speed any additional invocations.
-      $bytes .= fread($fh, max(4096, $count));
-      fclose($fh);
-    }
-    // If /dev/urandom is not available or returns no bytes, this loop will
-    // generate a good set of pseudo-random bytes on any system.
-    // Note that it may be important that our $random_state is passed
-    // through hash() prior to being rolled into $output, that the two hash()
-    // invocations are different, and that the extra input into the first one -
-    // the microtime() - is prepended rather than appended. This is to avoid
-    // directly leaking $random_state via the $output stream, which could
-    // allow for trivial prediction of further "random" numbers.
-    while (strlen($bytes) < $count) {
-      $random_state = hash('sha256', microtime() . mt_rand() . $random_state);
-      $bytes .= hash('sha256', mt_rand() . $random_state, TRUE);
-    }
-  }
-  $output = substr($bytes, 0, $count);
-  $bytes = substr($bytes, $count);
-  return $output;
-}
-
-/**
  * Handles transfering video from flash server to brightcove.
  */
 function brightcove_recorder_upload($video_id) {
+  global $user;
 
-  if(!video_recorder_verify_id($video_id)) {
+  if(!video_recorder_id_verify($video_id)) {
     drupal_set_header('Status: 404 Not Found');
     return drupal_json(array('error' => 'Invalid video ID.'));
   }
@@ -170,7 +142,7 @@ function brightcove_recorder_upload($video_id) {
     return drupal_json(array('error' => 'Failed to download video from flash server.'));
   }
 
-  // hack to create a secure temp file name.
+  // hack to create a secure temp file name with .flv exension
   $tmp_file = tempnam(file_directory_temp(), 'video-');
   unlink($tmp_file);
   $tmp_file .= '.flv';
@@ -178,17 +150,17 @@ function brightcove_recorder_upload($video_id) {
   $bytes = file_put_contents($tmp_file, $video_stream);
 
   if (FALSE === $bytes) {
-    @unlink($tmp_file); // we use @ in case permission prevented writing the temp file
+    @unlink($tmp_file); // we use @ in case permission prevent deleting the temp file
     drupal_set_header('Status: 500 Internal Server Error');
     return drupal_json(array('error' => 'Failed to write video local file.'));
   }
 
-  module_load_include('brightcove', 'module');
   $meta = array(
     'name' => $video_id,
     'shortDescription' => t('Uploaded video'),
   );
 
+  module_load_include('module', 'brightcove');
   $id = brightcove_upload_video($tmp_file, $meta);
   unlink($tmp_file); // clean up after ourselves
   if (!$id) {
@@ -202,5 +174,84 @@ function brightcove_recorder_upload($video_id) {
   $video->name = $video_id;
   brightcove_video_cache_set($id, $video);
 
+  brightcove_recorder_queue_action($id, 'thumb', $video_id);
+
   return drupal_json(array('brightcove_id' => $id));
+}
+
+/**
+ * Add an item to the delayed processing queue.
+ *
+ * We do this to get around the limitations of the Brightcove API.
+ */
+function brightcove_recorder_queue_action($video_id, $action, $video_hash = '') {
+  $args = (object) array(
+    'brightcove_id' => $video_id,
+    'action' => $action,
+    'queued' => time());
+
+  if ($video_hash) {
+    $args->video_hash = $video_hash;
+  }
+  drupal_write_record('brightcove_recorder_queue', $args);
+}
+
+/**
+ * Process a queued item.
+ */
+function brightcove_recorder_process_item($item) {
+  switch ($item['action']) {
+    case 'delete':
+      if (!brightcove_recorder_delete_video($item['brightcove_id'])) {
+        return FALSE;
+      }
+      break;
+
+    case 'thumb':
+      if (!brightcove_recorder_upload_thumb($item['brightcove_id'], $item['video_hash'])) {
+        return FALSE;
+      }
+      video_recorder_thumbnail_delete($item['video_hash']);
+      break;
+
+  }
+  db_query('DELETE FROM {brightcove_recorder_queue} WHERE qid = %s', $item['qid']);
+}
+
+/**
+ * Deletes a video from the Brightcove CDN.
+ */
+function brightcove_recorder_delete_video($id) {
+  module_load_include('module', 'brightcove');
+
+  $bc = brightcove_initialize();
+
+  try {
+    $id = $bc->delete('video', $id);
+  } catch (Exception $error) {
+    $vars = array('@id' => $id, '@error' => (string)$error);
+    watchdog('brightcove', 'Deleting video ID:@id from Brightcove failed. Error: @error', $vars, WATCHDOG_ERROR);
+    return FALSE;
+  }
+  return TRUE;
+}
+
+/**
+ * Uploads a thumbnail image for a video
+ */
+function brightcove_recorder_upload_thumb($id, $video_hash) {
+  $thumb = $_SERVER['DOCUMENT_ROOT'] . base_path() . video_recorder_thumbnail_path($video_hash);
+  $meta = array(
+    'type' => 'THUMBNAIL',
+  );
+
+  try {
+    $bc = brightcove_initialize();
+    $id = $bc->createImage('video', $thumb, $meta, $id);
+  } catch (Exception $error) {
+    $vars = array('@thumb' => $thumb, '@id' => $id, '@error' => (string)$error);
+    watchdog('brightcove', "Uploading thumbnail image '@thumb' to Brightcove for video ID:@id failed. Error: @error", $vars, WATCHDOG_ERROR);
+    return FALSE;
+  }
+  return TRUE;
 }
