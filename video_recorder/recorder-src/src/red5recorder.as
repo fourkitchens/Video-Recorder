@@ -14,6 +14,8 @@ import mx.graphics.codec.PNGEncoder;
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 
+import flash.external.ExternalInterface;
+
 NetConnection.defaultObjectEncoding = flash.net.ObjectEncoding.AMF3;
 SharedObject.defaultObjectEncoding  = flash.net.ObjectEncoding.AMF3;
 
@@ -87,6 +89,7 @@ public function init():void {
 
 private function recClicked():void { 
 	if (rec_btn.selected) {
+		setSaveState(false);
 		recordingTimer.start();
 		captureThumbnail();
 		recordStart();
@@ -95,6 +98,7 @@ private function recClicked():void {
 		recordingTimer.stop();
 		recordFinished();
 		publishThumbnail();
+		setSaveState(true);
 	}
 }
 
@@ -276,4 +280,12 @@ private function publishThumbnail():void {
 	
 	var urlLoader:URLLoader = new URLLoader();
 	urlLoader.load(saveImage);
+}
+
+private function setSaveState(enable:Boolean):void {
+	var jsFunction:String = 'videoRecorder.enableSave()';
+	if(!enable) {
+		jsFunction = 'videoRecorder.disableSave()';
+	}
+	ExternalInterface.call(jsFunction);
 }
