@@ -14,7 +14,6 @@
   </compiler>
   <applications>
     <application path="red5recorder.mxml"/>
-    <application path="BlinkApp.mxml"/>
   </applications>
   <modules/>
   <buildCSSFiles/>
