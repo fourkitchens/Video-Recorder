@@ -91,6 +91,11 @@ function brightcove_recorder_form_alter(&$form, &$form_state, $form_id) {
 function brightcove_recorder_node_form_after_build($form, &$form_state) {
 
   $record = t('Record');
+  $rerecord = t('Rerecord');
+  $preset = variable_get('video_recorder_thumbnail_preset', VIDEO_RECORDER_DEFAULT_THUMBNAIL_PRESET);
+  $url = imagecache_create_url($preset, variable_get('brightcove_default_thumbnail', brightcove_get_default_image()));
+  $img = theme_image($url, t('Thumbnail'), '', array(), FALSE);
+
   foreach ($form['#field_info'] as $name => $field) {
     if ($field['type'] != 'brightcove_video') {
       continue;
@@ -104,12 +109,23 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
     }
 
     for ($i = 0; $i < $count; ++$i) {
+      $label = $record;
+      $thumb = '';
+      if (!empty($form_state['values'][$field['field_name']][$i])) {
+        $m = array();
+        preg_match('/\[id:(\d+)\]/', $form_state['values'][$field['field_name']][$i]['video_id'], $m);
+        if (count($m) === 2 && $m[1]) {
+          $label = $rerecord;
+          $thumb = $img;
+        }
+      }
+
       $video_id = video_recorder_id_generate();
 
       $button = array(
         'record' => array(
           '#type' => 'brightcove_cck_browse_button',
-          '#value' => $record,
+          '#value' => $label,
           '#id' => check_plain("edit-{$field_name}-{$i}-record-{$video_id}"),
           '#attributes' => array('class' => 'brightcove-recorder-record-button'),
           '#tree' => TRUE,
@@ -125,7 +141,7 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
 
       $thumbnail = array(
         'thumbnail' => array(
-          '#value' => '<span id="brightcove-recorder-thumbnail-' . $video_id . '" class="recorder-thumbail"></span>',
+          '#value' => '<span id="brightcove-recorder-thumbnail-' . $video_id . '" class="recorder-thumbail">' . $thumb . '</span>',
         ),
       );
       $form[$name][$i]['actions'][] = $thumbnail;
@@ -279,7 +295,9 @@ function brightcove_recorder_upload_thumb($id, $video_hash) {
 
   try {
     $bc = brightcove_initialize();
-    $id = $bc->createImage('video', $thumb, $meta, $id);
+    $bc->createImage('video', $thumb, $meta, $id);
+    $meta['type'] = 'VIDEO_STILL';
+    $bc->createImage('video', $thumb, $meta, $id);
   } catch (Exception $error) {
     $vars = array('@thumb' => $thumb, '@id' => $id, '@error' => (string)$error);
     watchdog('brightcove', "Uploading thumbnail image '@thumb' to Brightcove for video ID:@id failed. Error: @error", $vars, WATCHDOG_ERROR);
