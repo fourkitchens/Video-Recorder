@@ -106,7 +106,6 @@ function brightcove_recorder_node_form_submit($form, &$form_state) {
     }
 
     for ($i = 0; $i < $count; ++$i) {
-      dpm($form_state['values'][$field['field_name']][$i]['video_id'], 'field');
       if (!empty($form_state['values'][$field['field_name']][$i]['video_id'])) {
         $id = $form_state['values'][$field['field_name']][$i]['video_id'];
         $title = $form_state['values']['title'];
