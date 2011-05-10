@@ -30,9 +30,9 @@ function brightcove_recorder_schema() {
         'length' => 25,
         'not null' => TRUE,
       ),
-      'video_hash' => array(
-        'description' => 'The name of the file to use with action.',
-        'type' => 'varchar',
+      'data' => array(
+        'description' => 'Additional data for the queue action',
+        'type' => 'text',
         'length' => 40,
         'not null' => FALSE,
       ),

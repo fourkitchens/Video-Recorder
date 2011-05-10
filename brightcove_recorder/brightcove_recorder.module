@@ -75,6 +75,12 @@ function brightcove_recorder_form_alter(&$form, &$form_state, $form_id) {
       continue;
     }
 
+    if (!isset($form['#submit'])) {
+      $form['#submit'] = array();
+    }
+
+    $form['#submit'][] = 'brightcove_recorder_node_form_submit';
+
     if (!isset($form['#after_build'])) {
       $form['#after_build'] = array();
     }
@@ -82,6 +88,31 @@ function brightcove_recorder_form_alter(&$form, &$form_state, $form_id) {
     $form['#after_build'][] = 'brightcove_recorder_node_form_after_build';
     // we only call after_build once regardless of how many brightcove fields in form
     return;
+  }
+}
+
+/**
+ * Implements form submit callback.
+ */
+function brightcove_recorder_node_form_submit($form, &$form_state) {
+  foreach ($form['#field_info'] as $name => $field) {
+    if ($field['type'] != 'brightcove_video') {
+      continue;
+    }
+
+    $count = $field['multiple'];
+    if ($count <= 1) {
+      ++$count;
+    }
+
+    for ($i = 0; $i < $count; ++$i) {
+      dpm($form_state['values'][$field['field_name']][$i]['video_id'], 'field');
+      if (!empty($form_state['values'][$field['field_name']][$i]['video_id'])) {
+        $id = $form_state['values'][$field['field_name']][$i]['video_id'];
+        $title = $form_state['values']['title'];
+        brightcove_recorder_queue_action($id, 'title', $title);
+      }
+    }
   }
 }
 
@@ -112,9 +143,8 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
       $label = $record;
       $thumb = '';
       if (!empty($form_state['values'][$field['field_name']][$i])) {
-        $m = array();
-        preg_match('/\[id:(\d+)\]/', $form_state['values'][$field['field_name']][$i]['video_id'], $m);
-        if (count($m) === 2 && $m[1]) {
+        $id = brightcove_parse_id($form_state['values'][$field['field_name']][$i]['video_id']);
+        if (!is_null($id)) {
           $label = $rerecord;
           $thumb = $img;
         }
@@ -232,14 +262,14 @@ function brightcove_recorder_request_delete($id, $hash) {
  *
  * We do this to get around the limitations of the Brightcove API.
  */
-function brightcove_recorder_queue_action($video_id, $action, $video_hash = '') {
+function brightcove_recorder_queue_action($video_id, $action, $data = '') {
   $args = (object) array(
     'brightcove_id' => $video_id,
     'action' => $action,
     'queued' => time());
 
-  if ($video_hash) {
-    $args->video_hash = $video_hash;
+  if ($data) {
+    $args->data = $data;
   }
   drupal_write_record('brightcove_recorder_queue', $args);
 }
@@ -256,12 +286,16 @@ function brightcove_recorder_process_item($item) {
       break;
 
     case 'thumb':
-      if (!brightcove_recorder_upload_thumb($item['brightcove_id'], $item['video_hash'])) {
+      if (!brightcove_recorder_upload_thumb($item['brightcove_id'], $item['data'])) {
         return FALSE;
       }
-      video_recorder_thumbnail_delete($item['video_hash']);
+      video_recorder_thumbnail_delete($item['data']);
       break;
 
+    case 'title':
+      if (!brightcove_recorder_retitle_video($item['brightcove_id'], $item['data'])) {
+        return FALSE;
+      }
   }
   db_query('DELETE FROM {brightcove_recorder_queue} WHERE qid = %s', $item['qid']);
 }
@@ -272,9 +306,8 @@ function brightcove_recorder_process_item($item) {
 function brightcove_recorder_delete_video($id) {
   module_load_include('module', 'brightcove');
 
-  $bc = brightcove_initialize();
-
   try {
+    $bc = brightcove_initialize();
     $id = $bc->delete('video', $id);
   } catch (Exception $error) {
     $vars = array('@id' => $id, '@error' => (string)$error);
@@ -285,7 +318,7 @@ function brightcove_recorder_delete_video($id) {
 }
 
 /**
- * Uploads a thumbnail image for a video
+ * Uploads a thumbnail and still image for a video
  */
 function brightcove_recorder_upload_thumb($id, $video_hash) {
   $thumb = $_SERVER['DOCUMENT_ROOT'] . base_path() . video_recorder_thumbnail_path($video_hash);
@@ -304,4 +337,21 @@ function brightcove_recorder_upload_thumb($id, $video_hash) {
     return FALSE;
   }
   return TRUE;
+}
+
+function brightcove_recorder_retitle_video($id, $title) {
+  $meta = array(
+    'id' => $id,
+    'name' => $title,
+  );
+
+  try {
+    $bc = brightcove_initialize();
+    $id = $bc->update('video', $meta);
+  } catch (Exception $error) {
+    $vars = array('@id' => $id, '@title' => $title, '@error' => (string)$error);
+    watchdog('brightcove', 'Retitling video ID:@id to "@title" in Brightcove failed. Error: @error', $vars, WATCHDOG_ERROR);
+    return FALSE;
+  }
+  return TRUE; 
 }
