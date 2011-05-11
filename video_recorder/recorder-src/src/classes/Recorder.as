@@ -22,11 +22,14 @@ package classes
 		// Drupal module extensions
 		public var bandwidth:int=0;
 		public var compression:int=70;
+		public var id:String='video_recorder';
 		public var keyframe:int=30; // every 2 seconds @ 15fps (default)
 		public var playText:String="Play";
 		public var recText:String="Rec";
 		public var recordTooltipText:String="Start / stop recording";
 		public var reviewTooltipText:String="Review recording";
+		public var saveText:String="Save";
+		public var saveTooltipText:String="Save recording to server";
 		public var settingsText:String="Settings";
 		public var stopText:String="Stop";
 		public var thumbnailSaveURL:String="";

@@ -128,6 +128,9 @@ function brightcove_recorder_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     if (!empty($node->{$field}[$delta]['video_id'])) {
       $id = $node->{$field}[$delta]['video_id'];
       $title = token_replace($tpl, 'node', $node);
+      if (0 <> $delta) {
+        $title .= "-{$delta}";
+      }
       brightcove_recorder_queue_action($id, 'title', $title);
     }
   }
@@ -426,4 +429,12 @@ function brightcove_recorder_retitle_video($id, $title) {
     return FALSE;
   }
   return TRUE; 
+}
+
+/**
+ * Implements hook_video_recorder_defaults_alter().
+ */
+function brightcove_recorder_video_recorder_defaults_alter($options) {
+  // Not actually used for anything in the real world, just used for validation of the API
+  //$options['id'] = 'brightcove-recorder';
 }

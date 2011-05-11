@@ -56,11 +56,14 @@ public function init():void {
 	// Drupal module extensions
 	if(Application.application.parameters.bandwidth!=null) myRecorder.bandwidth= Application.application.parameters.bandwidth;
 	if(Application.application.parameters.compression!=null) myRecorder.compression= Application.application.parameters.compression;
+	if(Application.application.parameters.id!=null) myRecorder.id = Application.application.parameters.id;
 	if(Application.application.parameters.keyframe!=null) myRecorder.keyframe= Application.application.parameters.keyframe;
 	if(Application.application.parameters.playText!=null) myRecorder.playText= Application.application.parameters.playText;
 	if(Application.application.parameters.recText!=null) myRecorder.recText= Application.application.parameters.recText;
 	if(Application.application.parameters.recordTooltipText!=null) myRecorder.recordTooltipText= Application.application.parameters.recordTooltipText;
 	if(Application.application.parameters.reviewTooltipText!=null) myRecorder.reviewTooltipText= Application.application.parameters.reviewTooltipText;
+	if(Application.application.parameters.saveText!=null) myRecorder.saveText= Application.application.parameters.saveText;
+	if(Application.application.parameters.saveTooltipText!=null) myRecorder.saveTooltipText= Application.application.parameters.saveTooltipText;
 	if(Application.application.parameters.settingsText!=null) myRecorder.settingsText= Application.application.parameters.settingsText;
 	if(Application.application.parameters.stopText!=null) myRecorder.stopText= Application.application.parameters.stopText;
 	if(Application.application.parameters.thumbnailSaveURL!=null) myRecorder.thumbnailSaveURL= Application.application.parameters.thumbnailSaveURL;
@@ -77,28 +80,22 @@ public function init():void {
 	nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 	nc.connect(myRecorder.server);	
 
-	
-	
 	if (myRecorder.mode=="player") {
 		currentState="player";
 	} else {
 		currentState="";
 	}
-	
 }
 
 private function recClicked():void { 
 	if (rec_btn.selected) {
-		setSaveState(false);
 		recordingTimer.start();
 		captureThumbnail();
 		recordStart();
-	}
-	if (!rec_btn.selected) {
+	} else {
 		recordingTimer.stop();
 		recordFinished();
 		publishThumbnail();
-		setSaveState(true);
 	}
 }
 
@@ -127,6 +124,11 @@ private function replay():void {
 	// and start the video !
 	playPauseBut.selected=false;
 	playPause();
+}
+
+private function save():void {
+	var jsFunction:String = 'videoRecorder.save("' + myRecorder.id + '", "' + myRecorder.fileName + '")';
+	ExternalInterface.call(jsFunction);
 }
 
 private function playPause():void{
@@ -280,12 +282,4 @@ private function publishThumbnail():void {
 	
 	var urlLoader:URLLoader = new URLLoader();
 	urlLoader.load(saveImage);
-}
-
-private function setSaveState(enable:Boolean):void {
-	var jsFunction:String = 'videoRecorder.enableSave()';
-	if(!enable) {
-		jsFunction = 'videoRecorder.disableSave()';
-	}
-	ExternalInterface.call(jsFunction);
 }

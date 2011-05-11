@@ -130,7 +130,6 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
   $id           = check_plain($options['id']);
   $fps          = (int) $options['fps'];
   $kfs          = (int) $options['kfs'];
-  $length       = (int) $options['length'];
 
   $flash_vars = http_build_query(array(
     'backText' => $options['back'],
@@ -139,6 +138,7 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
     'fileName' => $video_id,
     'fps' => $fps,
     'height' => (int) $options['height'],
+    'id' => $id,
     // calculate number of frames between each keyframe based on current FPS
     'keyframe' => $fps * $kfs,
     'maxLength' => (int) $options['length'],
@@ -148,6 +148,8 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
     'recText' => check_plain($options['rec']),
     'reviewTooltipText' => check_plain($options['review_tooltip']),
     'settingsText' => check_plain($options['settings']),
+    'saveText' => check_plain($options['save']),
+    'saveTooltipText' => check_plain($options['save_tooltip']),
     'server' => check_plain($options['rtmp_url']),
     'stop' => check_plain($options['stop']),
     'thumbnailSaveURL' => check_plain($options['thumbnail_save_url']),
@@ -157,8 +159,6 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
   ));
 
   $recorder = $base_path . drupal_get_path('module', 'video_recorder') . '/recorder.swf';
-
-  $save = t('Save');
 
   $content = <<<HTML
     <div id="{$id}-wrapper" class="video-recorder-wrapper">
@@ -175,11 +175,6 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
           FlashVars="{$flash_vars}">
         </embed>
       </object>
-    </div>
-
-    <div id="{$id}-save-wrapper" class="video-recorder-save-wrapper ahah-progress">
-      <a href="#" id="{$id}-save-{$video_id}" class="video-recorder-save" rel="{$id}">{$save}</a>
-      <span style="display:none;" class="throbber"></span>
     </div>
 HTML;
 
@@ -205,6 +200,8 @@ function video_recorder_defaults() {
     'record_tooltip' => t('Start / stop recording'),
     'review_tooltip' => t('Review recording'),
     'rtmp_url' => variable_get('video_recorder_rtmp_url', VIDEO_RECORDER_DEFAULT_RTMP_URL),
+    'save' => t('Save'),
+    'save_tooltip' => t('Save recording to server'),
     'settings' => t('Settings'),
     'stop' => t('Stop'),
     'time_left' => t('Time Left:'),
@@ -212,6 +209,8 @@ function video_recorder_defaults() {
     'volume' => t('Volume'),
     'width' => VIDEO_RECORDER_DEFAULT_WIDTH,
   );
+
+  drupal_alter('video_recorder_defaults', $options);
 
   return $options;
 }
