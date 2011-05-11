@@ -3,9 +3,9 @@
 /**
  * The time to wait before manipulating Brightcove API objects.
  *
- * Based on testing 5-6mins is adequate, this gives additional leeway.
+ * Based on testing 5-6 minutes is the longest lag time.
  */
-define('BRIGHTCOVE_RECORDER_API_WAIT', 60 * 10); // 10mins
+define('BRIGHTCOVE_RECORDER_API_WAIT', 60 * 6); // 6 mins
 
 /**
  * @file
@@ -59,6 +59,32 @@ function brightcove_recorder_cron() {
 }
 
 /**
+ * Implements hook_field_settings_alter().
+ */
+function brightcove_recorder_field_settings_alter(&$data, $op, $field) {
+  if ('brightcove_video' !== $field['type']) {
+    return;
+  }
+
+  switch ($op) {
+    case 'form':
+      $data['title_template'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Video Title'),
+        '#default_value' => !empty($field['title_template']) ? $field['title_template'] : '[title-raw]',
+        '#description' => t('Enter the tokens to be used for the title of the submitted video, '
+          . 'you can use any <a href="http://drupal.org/node/390482#token-node-group" target="_blank"> node tokens.'),
+        '#required' => TRUE,
+      );
+      break;
+
+    case 'save':
+      $data[] = 'title_template';
+      break;
+  }
+}
+
+/**
  * Implements hook_form_alter().
  */
 function brightcove_recorder_form_alter(&$form, &$form_state, $form_id) {
@@ -91,13 +117,39 @@ function brightcove_recorder_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 
+function brightcove_recorder_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ('insert' != $op && 'update' != $op) {
+    return;
+  }
+
+  $fields = _brightcove_recorder_retitle_hack();
+  foreach ($fields as $key => $tpl) {
+    list($field, $delta) = explode('|', $key);
+    if (!empty($node->{$field}[$delta]['video_id'])) {
+      $id = $node->{$field}[$delta]['video_id'];
+      $title = token_replace($tpl, 'node', $node);
+      brightcove_recorder_queue_action($id, 'title', $title);
+    }
+  }
+}
+
 /**
  * Implements form submit callback.
  */
 function brightcove_recorder_node_form_submit($form, &$form_state) {
+  static $token_enabled;
+  if (!isset($token_enabled)) {
+    $token_enabled = module_exists('token');
+  }
+
   foreach ($form['#field_info'] as $name => $field) {
     if ($field['type'] != 'brightcove_video') {
       continue;
+    }
+
+    $tpl = '[title-raw]';
+    if($token_enabled && !empty($field['title_template'])) {
+      $tpl = $field['title_template'];
     }
 
     $count = $field['multiple'];
@@ -108,11 +160,32 @@ function brightcove_recorder_node_form_submit($form, &$form_state) {
     for ($i = 0; $i < $count; ++$i) {
       if (!empty($form_state['values'][$field['field_name']][$i]['video_id'])) {
         $id = $form_state['values'][$field['field_name']][$i]['video_id'];
-        $title = $form_state['values']['title'];
-        brightcove_recorder_queue_action($id, 'title', $title);
+        $title = "{$form_state['values']['title']}";
+        if ($token_enabled) {
+          $key = "{$name}|{$i}";
+          _brightcove_recorder_retitle_hack($key, $tpl);
+        } else {
+          if (0 <> $i) {
+            $title .= "-{$i}";
+          }
+          brightcove_recorder_queue_action($id, 'title', $title);
+        }
       }
     }
   }
+}
+
+/**
+ * Works around a limitation of Drupal when creating / updating nodes.
+ *
+ * The static $list variable store a list of relevant videos to retitle.
+ */
+function _brightcove_recorder_retitle_hack($key = NULL, $token = NULL) {
+  static $list;
+  if (is_null($key) && is_null($token)) {
+    return $list;
+  }
+  $list[$key] = $token;
 }
 
 /**
