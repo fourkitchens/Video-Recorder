@@ -7,29 +7,40 @@
 			<mx:RemoveChild target="{canvas1}"/>
 			<mx:RemoveChild target="{micLevel}"/>
 			<mx:AddChild relativeTo="{canvas2}" position="lastChild">
+
+				<!-- Video PLAYER -->
 				<mx:Canvas label="player" width="100%" height="100%">
-							<mx:VideoDisplay id="videoPlayer"  mouseMove="rollOver(event)" mouseOut="rollOut(event)"
-								 right="0" left="0"  complete="videoIsComplete()" bottom="0" top="0"/>
-							<mx:Panel id="videoOptionsPanel" layout="absolute" verticalScrollPolicy="off" horizontalScrollPolicy="off" cornerRadius="5" roundedBottomCorners="true" backgroundColor="#DFDFDF" borderThicknessLeft="5" borderThicknessRight="5" borderThicknessTop="5" borderThicknessBottom="5" headerHeight="0" left="0" right="0" 
-								
-								height="40" alpha="0.8" bottom="0" borderStyle="solid" backgroundAlpha="0.6">    
+							<mx:VideoDisplay id="videoPlayer" mouseMove="rollOver(event)" mouseOut="rollOut(event)" bottom="0" top="0" right="0" left="0" complete="videoIsComplete()" />
+							<mx:Panel id="videoOptionsPanel"
+									layout="absolute"
+									left="5"
+									right="5"
+									bottom="21"
+									height="40"
+									verticalScrollPolicy="off"
+									horizontalScrollPolicy="off"
+									cornerRadius="5"
+									backgroundColor="#000000"
+									borderStyle="solid"
+									borderColor="#000000"
+									headerHeight="0" 
+									alpha="1"
+									backgroundAlpha="0.6">    
 							
-							<mx:ProgressBar id="loadProgress" label="" mode="event" barColor="#00ff00"
+							<mx:ProgressBar id="loadProgress" mode="event" barColor="#00ff00"
 							 minimum="0" maximum="{videoPlayer.totalTime}" height="5"
-							 source="{ videoPlayer}" trackHeight="7"  left="80" right="44" bottom="3"/>
+							 source="{videoPlayer}" trackHeight="10" left="80" right="44" bottom="4"/>
 							
-							<mx:HSlider id="position" height="9"   dataTipFormatFunction="formatPositionToolTip"  slideDuration="0"
-							 value="{videoPlayer.playheadTime}" 	 minWidth="10"   minimum="0" maximum="{videoPlayer.totalTime}" left="80" right="44" bottom="10" showTrackHighlight="true"
-							  styleName="scrollBar" thumbPress="thumbPressed()" thumbRelease="thumbReleased()"
-							 
-							mouseDown="thumbClicked(event)" allowTrackClick="true"/> 
+							<mx:HSlider id="position" height="0" dataTipFormatFunction="formatPositionToolTip" slideDuration="0"
+							 value="{videoPlayer.playheadTime}" minWidth="10" minimum="0" maximum="{videoPlayer.totalTime}"
+							 left="80" right="44" bottom="10" showTrackHighlight="true" styleName="scrollBar"
+							 thumbPress="thumbPressed()" thumbRelease="thumbReleased()" mouseDown="thumbClicked(event)" allowTrackClick="true"/>
 							
-							<mx:Button id="playPauseBut" click="playPause();" width="35" height="25" cornerRadius="5" left="0" bottom="0" styleName="playButton" toggle="true" toolTip="Play/Pause"/>
-							<mx:Button id="stopBut" styleName="arial10E" left="38" width="35" height="25" cornerRadius="5" bottom="0" 	 toolTip="Stop" click="stopVideo()" icon="@Embed(source='assets/player_stop.png')"/>
+							<mx:Button id="playPauseBut" styleName="playButton" click="playPause();" width="32" height="32" cornerRadius="5" top="2" left="0"  toolTip="Play/Pause" toggle="true" />
+							<mx:Button id="stopBut" 	 styleName="stopButton" click="stopVideo()"  width="32" height="32" cornerRadius="5" top="2" left="38" toolTip="Stop" />
 							
-							<gauge:Gauge id="volume" gaugeClick="handleGaugeEvent(event)" liveDragging="true" right="-1" bottom="0" width="40" height="20" needleThickness="0.3" coverColor="#0000FF" coverAlpha="0.8" 
-								coverDropShadowEnabled="false" />
-							<mx:Label y="-2" text="{formatPositionToolTip(videoPlayer.playheadTime)} / {formatPositionToolTip(videoPlayer.totalTime)}" width="141" id="timer_txt" styleName="arial10E" horizontalCenter="0" textAlign="center"/>
+							<gauge:Gauge id="volume" gaugeClick="handleGaugeEvent(event)" liveDragging="true" right="0" top="1" width="40" height="36" needleThickness="0.3" coverColor="#0000FF" coverAlpha="0.8" coverDropShadowEnabled="false" />
+							<mx:Label id="timer_txt" y="-2" text="{formatPositionToolTip(videoPlayer.playheadTime)} / {formatPositionToolTip(videoPlayer.totalTime)}" width="141" horizontalCenter="0" textAlign="center" color="#ccddee" />
 							
 							
 							</mx:Panel>
@@ -40,9 +51,11 @@
 			</mx:AddChild>
 		</mx:State>
 	</mx:states>
+
 <mx:Script source="red5recorder.as" />
 <mx:Style source="style.css" />
 
+		<!-- Video RECORDER -->
 		<mx:Canvas label="recorder" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off" id="canvas2">
 			<mx:VideoDisplay id="myWebcam" left="0" top="0" bottom="16" right="0"/>
 			<mx:Canvas visible="{rec_btn.selected}" right="0" top="0" backgroundColor="#000000" backgroundAlpha="0.7" width="100%">
@@ -51,11 +64,11 @@
 			<mx:Button y="0" icon="@Embed('assets/webcamON.png')" height="18" width="35"
 				id="cam1_btn" click="webcamParameters()" toolTip="{myRecorder.settingsText}" label="1" x="0"/>
 			<mx:ProgressBar label="{myRecorder.volumeText}" labelPlacement="center" minimum="0" maximum="100" id="micLevel" mode="manual" visible="{myRecorder.showVolume}" bottom="0" right="0" left="0"/>
-			<mx:Canvas height="36" cornerRadius="5" borderStyle="solid" borderColor="#000000" backgroundColor="#FFFFFF" backgroundAlpha="0.5" alpha="0.6" id="canvas1" left="0" right="0" bottom="16">
-				<mx:Button label="{myRecorder.recText}" toggle="true" width="100" height="33" top="0" id="rec_btn" click="recClicked()" toolTip="{myRecorder.recordTooltipText}" visible="{myRecorder.cameraDetected}" styleName="recordButton"/>
-				<mx:Label right="5" y="6" text="{myRecorder.timeLeftText} {timeLeft}" color="#000000"/>
-				<mx:Button label="{myRecorder.playText}" width="100" height="33" icon="@Embed(source='assets/player_play.png')" top="0" id="replay_btn" click="replay()" toolTip="{myRecorder.reviewTooltipText}" x="115" visible="{myRecorder.hasRecorded}"/>
-				<mx:Button label="{myRecorder.saveText}" width="100" height="33" icon="@Embed(source='assets/circle.png')" top="0" id="save_btn" click="save()" toolTip="{myRecorder.saveTooltipText}" x="230" visible="{myRecorder.hasRecorded}"/>
+			<mx:Canvas id="canvas1" height="40" left="5" right="5" bottom="21" cornerRadius="5" borderStyle="solid" borderColor="#000000" backgroundColor="#000000" backgroundAlpha="0.5" alpha="1">
+				<mx:Label right="5" y="6" text="{myRecorder.timeLeftText} {timeLeft}" color="#ccddee"/>
+				<mx:Button id="rec_btn"    label="{myRecorder.recText}"  width="32" height="32" top="3" left="52"   click="recClicked()" toolTip="{myRecorder.recordTooltipText}" 								visible="{myRecorder.cameraDetected}" styleName="recordButton" toggle="true" />
+				<mx:Button id="replay_btn" label="{myRecorder.playText}" width="32" height="32" top="3" left="10"   click="replay()" 				toolTip="{myRecorder.reviewTooltipText}" x="115" visible="{myRecorder.hasRecorded}" icon="@Embed(source='assets/player_play.png')" />
+				<mx:Button id="save_btn"   label="{myRecorder.saveText}" width="80" height="32" top="3" right="100" click="save()" 						toolTip="{myRecorder.saveTooltipText}" 		x="230" visible="{myRecorder.hasRecorded}" icon="@Embed(source='assets/circle.png')" />
 			</mx:Canvas>
 		</mx:Canvas>
 		
