@@ -1,4 +1,15 @@
 /* CSS file */
+.recordButton {
+	selected-disabled-icon: Embed(source="assets/player_pause.png"); 
+	selected-over-icon: Embed(source="assets/player_pause.png");
+	selected-up-icon: Embed(source="assets/player_pause.png");
+	
+	down-icon: Embed(source="assets/rec32.png");
+	over-icon: Embed(source="assets/rec32-over.png"); 
+	up-icon: Embed(source="assets/rec32.png");
+	backgroundColor: #000;
+}
+
 .playButton { 
 	down-icon: Embed(source="assets/player_pause.png"); 
 	over-icon: Embed(source="assets/player_pause.png"); 
@@ -8,14 +19,10 @@
 	selected-over-icon: Embed(source="assets/player_play.png");
 	selected-up-icon: Embed(source="assets/player_play.png");
 }
-.recordButton {
-	selected-disabled-icon: Embed(source="assets/player_pause.png"); 
-	selected-over-icon: Embed(source="assets/player_pause.png");
-	selected-up-icon: Embed(source="assets/player_pause.png");
-	
-	down-icon: Embed(source="assets/rec32.png");
-	over-icon: Embed(source="assets/rec32.png"); 
-	up-icon: Embed(source="assets/rec32.png"); 
+.stopButton { 
+	down-icon: Embed(source="assets/player_stop.png"); 
+	over-icon: Embed(source="assets/player_stop.png"); 
+	up-icon: Embed(source="assets/player_stop.png"); 
 }
 
 .scrollBar {
