@@ -1,20 +1,20 @@
 // ActionScript file
-import classes.Recorder;
+import com.fourkitchens.Recorder;
 
 import components.gauge.events.GaugeEvent;
 
+import flash.display.Bitmap;
+import flash.display.BitmapData;
+import flash.events.ContextMenuEvent;
+import flash.external.ExternalInterface;
 import flash.media.Camera;
+import flash.net.URLRequest;
+import flash.ui.ContextMenu;
 import flash.utils.Timer;
 
 import mx.controls.Alert;
 import mx.core.Application;
-
 import mx.graphics.codec.PNGEncoder;
-
-import flash.display.Bitmap;
-import flash.display.BitmapData;
-
-import flash.external.ExternalInterface;
 
 NetConnection.defaultObjectEncoding = flash.net.ObjectEncoding.AMF3;
 SharedObject.defaultObjectEncoding  = flash.net.ObjectEncoding.AMF3;
@@ -32,42 +32,12 @@ public var DEBUG:Boolean=false;
 public var recordingTimer:Timer = new Timer( 1000 , 0 );
 [Bindable] public var timeLeft:String="";
 
-public var thumbnailBytes:ByteArray;
+protected var thumbnailBytes:ByteArray;
+
+protected var customMenuItem:ContextMenuItem;
 
 public function init():void {
-	myRecorder = new Recorder();
-	
-	// get parameters
-	if(Application.application.parameters.maxLength!=null) myRecorder.maxLength= Application.application.parameters.maxLength;
-	if(Application.application.parameters.fileName!=null) myRecorder.fileName = Application.application.parameters.fileName;
-	if(Application.application.parameters.width!=null) myRecorder.width= Application.application.parameters.width;
-	if(Application.application.parameters.height!=null) myRecorder.height= Application.application.parameters.height;
-	if(Application.application.parameters.server!=null) myRecorder.server= Application.application.parameters.server;
-	if(Application.application.parameters.fps!=null) myRecorder.fps= Application.application.parameters.fps;
-	if(Application.application.parameters.microRate!=null) myRecorder.microRate= Application.application.parameters.microRate;
-	if(Application.application.parameters.showVolume!=null) myRecorder.showVolume= Application.application.parameters.showVolume;
-	if(Application.application.parameters.recordingText!=null) myRecorder.recordingText= Application.application.parameters.recordingText;
-	if(Application.application.parameters.timeLeftText!=null) myRecorder.timeLeftText= Application.application.parameters.timeLeftText;
-	if(Application.application.parameters.timeLeft!=null) myRecorder.timeLeft= Application.application.parameters.timeLeft;
-	if(Application.application.parameters.mode!=null) myRecorder.mode= Application.application.parameters.mode;
-	if(Application.application.parameters.backToRecorder!=null) myRecorder.backToRecorder= Application.application.parameters.backToRecorder;
-	if(Application.application.parameters.backText!=null) myRecorder.backText= Application.application.parameters.backText;
-	
-	// Drupal module extensions
-	if(Application.application.parameters.bandwidth!=null) myRecorder.bandwidth= Application.application.parameters.bandwidth;
-	if(Application.application.parameters.compression!=null) myRecorder.compression= Application.application.parameters.compression;
-	if(Application.application.parameters.id!=null) myRecorder.id = Application.application.parameters.id;
-	if(Application.application.parameters.keyframe!=null) myRecorder.keyframe= Application.application.parameters.keyframe;
-	if(Application.application.parameters.playText!=null) myRecorder.playText= Application.application.parameters.playText;
-	if(Application.application.parameters.recText!=null) myRecorder.recText= Application.application.parameters.recText;
-	if(Application.application.parameters.recordTooltipText!=null) myRecorder.recordTooltipText= Application.application.parameters.recordTooltipText;
-	if(Application.application.parameters.reviewTooltipText!=null) myRecorder.reviewTooltipText= Application.application.parameters.reviewTooltipText;
-	if(Application.application.parameters.saveText!=null) myRecorder.saveText= Application.application.parameters.saveText;
-	if(Application.application.parameters.saveTooltipText!=null) myRecorder.saveTooltipText= Application.application.parameters.saveTooltipText;
-	if(Application.application.parameters.settingsText!=null) myRecorder.settingsText= Application.application.parameters.settingsText;
-	if(Application.application.parameters.stopText!=null) myRecorder.stopText= Application.application.parameters.stopText;
-	if(Application.application.parameters.thumbnailSaveURL!=null) myRecorder.thumbnailSaveURL= Application.application.parameters.thumbnailSaveURL;
-	if(Application.application.parameters.volumeText!=null) myRecorder.volumeText= Application.application.parameters.volumeText;
+	myRecorder = new Recorder(Application.application.parameters);
 
 	Application.application.width = myRecorder.width;
 	Application.application.height = myRecorder.height;
@@ -85,9 +55,11 @@ public function init():void {
 	} else {
 		currentState="";
 	}
+	
+	addContextMenuItems();
 }
 
-private function recClicked():void { 
+protected function recClicked():void { 
 	if (rec_btn.selected) {
 		recordingTimer.start();
 		captureThumbnail();
@@ -99,12 +71,12 @@ private function recClicked():void {
 	}
 }
 
-private function videoIsComplete():void {
+protected function videoIsComplete():void {
 	playPauseBut.selected=true;
 	playPause();
 }
 
-private function thumbClicked(e:MouseEvent):void {
+protected function thumbClicked(e:MouseEvent):void {
 	videoPlayer.playheadTime = position.value;	
 }
 
@@ -115,7 +87,7 @@ public function stopVideo():void {
 	playPauseBut.selected = false;
 }
 
-private function replay():void {
+protected function replay():void {
 	rec_btn.selected=false;
 	recClicked();
 	currentState="player";
@@ -126,12 +98,12 @@ private function replay():void {
 	playPause();
 }
 
-private function save():void {
+protected function save():void {
 	var jsFunction:String = 'videoRecorder.save("' + myRecorder.id + '", "' + myRecorder.fileName + '")';
 	ExternalInterface.call(jsFunction);
 }
 
-private function playPause():void{
+protected function playPause():void{
 	if (playPauseBut.selected) {
 		videoPlayer.pause();
 	} else {
@@ -139,13 +111,13 @@ private function playPause():void{
 	}
 }
 
-private function thumbPressed():void {
+protected function thumbPressed():void {
 	playPauseBut.selected=true;
 	videoPlayer.pause();
 }	
 
 
-private function thumbReleased():void {
+protected function thumbReleased():void {
 	videoPlayer.playheadTime = position.value;
 	return;
 		
@@ -157,21 +129,21 @@ private function thumbReleased():void {
 	}
 }
 
-private function formatPositionToolTip(value:Number):String{
+protected function formatPositionToolTip(value:Number):String{
 	return value.toFixed(2) +" s";
 }
 
-private function handleGaugeEvent( event:GaugeEvent ) : void{	
+protected function handleGaugeEvent( event:GaugeEvent ) : void{	
 	videoPlayer.volume = event.value/100;
 }
 
-private function rollOut(e:MouseEvent):void {
+protected function rollOut(e:MouseEvent):void {
 }
 
-private function rollOver(e:MouseEvent):void {
+protected function rollOver(e:MouseEvent):void {
 } 
 
-private function netStatusHandler(event:NetStatusEvent):void {
+protected function netStatusHandler(event:NetStatusEvent):void {
 	switch (event.info.code) {
 		case "NetConnection.Connect.Failed":
 			Alert.show("ERROR:Could not connect to: "+myRecorder.server);
@@ -214,7 +186,7 @@ public function webcamParameters():void {
 	Security.showSettings(SecurityPanel.DEFAULT);
 }
 
-private function drawMicLevel(evt:TimerEvent):void {
+protected function drawMicLevel(evt:TimerEvent):void {
 		var ac:int=mic.activityLevel;
 		micLevel.setProgress(ac,100);
 }
@@ -247,7 +219,7 @@ private  function prepareStreams():void {
 	}	
 }
    
-private function cameraStatus(evt:StatusEvent):void {
+protected function cameraStatus(evt:StatusEvent):void {
 	switch (evt.code) {
 		case "Camera.Muted":
 			myRecorder.cameraDetected=false;
@@ -258,7 +230,7 @@ private function cameraStatus(evt:StatusEvent):void {
 	}
 }
 
-private function captureThumbnail():void {
+protected function captureThumbnail():void {
 	if (!myRecorder.thumbnailSaveURL) {
 		return;
 	}
@@ -269,7 +241,7 @@ private function captureThumbnail():void {
 	thumbnailBytes = imageEncoder.encode(thumbnailData);
 }
 
-private function publishThumbnail():void {
+protected function publishThumbnail():void {
 	if (!myRecorder.thumbnailSaveURL) {
 		return;
 	}
@@ -282,4 +254,27 @@ private function publishThumbnail():void {
 	
 	var urlLoader:URLLoader = new URLLoader();
 	urlLoader.load(saveImage);
+}
+
+protected function addContextMenuItems():void {
+	if (!contextMenu) {
+		contextMenu = new ContextMenu();
+	}
+	contextMenu.hideBuiltInItems();
+
+	customMenuItem = new ContextMenuItem('Drupal Video Recorder', true);
+	customMenuItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, projectMenuItemSelected);
+	
+	contextMenu.customItems.push(customMenuItem);
+}
+
+/**
+ * Handle the drupal.org project menu item being clicked.
+ * 
+ * This has to be public for the event to handler work - skwashd 20110512.
+ */ 
+public function projectMenuItemSelected(event:ContextMenuEvent):void {
+	Alert.show("Event Fired!");
+	var URL:URLRequest = new URLRequest('http://drupal.org/project/video_recorder');
+	navigateToURL(URL);
 }

@@ -1,4 +1,4 @@
-package classes
+package com.fourkitchens
 {
 	[Bindable] public class Recorder
 	{
@@ -18,7 +18,7 @@ package classes
 		public var backToRecorder:Boolean=true;
 		public var backText:String="Back";
 		public var cameraDetected:Boolean=false;
-
+		
 		// Drupal module extensions
 		public var bandwidth:int=0;
 		public var compression:int=70;
@@ -27,7 +27,7 @@ package classes
 		public var playText:String="Play";
 		public var recText:String="Rec";
 		public var recordTooltipText:String="Start / stop recording";
-		public var reviewTooltipText:String="Review recording";
+		public var reviewTooltipText:String="FUCK recording";
 		public var saveText:String="Save";
 		public var saveTooltipText:String="Save recording to server";
 		public var settingsText:String="Settings";
@@ -35,14 +35,24 @@ package classes
 		public var thumbnailSaveURL:String="";
 		public var volumeText:String="Volume";
 		
-		public function Recorder()
-		{	timeLeft = maxLength;
-			mode="record";
-			/*this.maxLength = maxLength;
-			this.fileName = fileName;
-			this.width = width;
-			this.height = height;
-			this.server = server;*/
+		public function Recorder(params:Object):void {
+			var option:String,
+			key:String,
+			options:Array = [
+				'backText', 'backToRecorder', 'bandwidth', 'compression', 'fileName', 'fps',
+				'height', 'id', 'keyframe', 'maxLength', 'microRate', 'mode', 'playText', 
+				'recText', 'recordingText', 'recordTooltipText', 'reviewTooltipText', 
+				'saveText', 'saveTooltipText', 'server', 'showVolume', 'timeLeft', 
+				'timeLeftText', 'width'
+			];
+
+			for (option in options) {
+				key = options[option];
+				if (null != params[key]) {
+					this[key] = params[key]; 
+				}
+			}
+			timeLeft = maxLength;
 		}
 	}
 }
