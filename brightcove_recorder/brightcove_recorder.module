@@ -73,7 +73,7 @@ function brightcove_recorder_field_settings_alter(&$data, $op, $field) {
         '#title' => t('Video Title'),
         '#default_value' => !empty($field['title_template']) ? $field['title_template'] : '[title-raw]',
         '#description' => t('Enter the tokens to be used for the title of the submitted video, '
-          . 'you can use any <a href="http://drupal.org/node/390482#token-node-group" target="_blank"> node tokens.'),
+          . 'you can use any <a href="http://drupal.org/node/390482#token-node-group" target="_blank">node tokens</a>.'),
         '#required' => TRUE,
       );
       break;
@@ -436,5 +436,4 @@ function brightcove_recorder_retitle_video($id, $title) {
  */
 function brightcove_recorder_video_recorder_defaults_alter($options) {
   // Not actually used for anything in the real world, just used for validation of the API
-  //$options['id'] = 'brightcove-recorder';
 }
