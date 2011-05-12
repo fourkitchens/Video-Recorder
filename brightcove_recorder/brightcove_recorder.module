@@ -184,7 +184,7 @@ function brightcove_recorder_node_form_submit($form, &$form_state) {
  * The static $list variable store a list of relevant videos to retitle.
  */
 function _brightcove_recorder_retitle_hack($key = NULL, $token = NULL) {
-  static $list;
+  static $list = array();
   if (is_null($key) && is_null($token)) {
     return $list;
   }
