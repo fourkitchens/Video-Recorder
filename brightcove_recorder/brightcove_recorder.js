@@ -12,13 +12,13 @@ Drupal.behaviors.brightcoveRecorderAttachActions = function(context) {
           var input = $('#edit-' + fieldName + '-' + delta + '-video-id'),
             brightcoveId = input.val().match(/\[id:(\d+)\]/);
           if (null !== brightcoveId && brightcoveId.length) {
-            var requestURL = Drupal.settings.basePath + 'brightcove_recorder/delete/' + brightcoveId[1] + '/' + videoId;
+            var requestURL = Drupal.settings.basePath + '?q=brightcove_recorder/delete/' + brightcoveId[1] + '/' + videoId;
             $.post(requestURL, '', function(data) {});
           }
           $('#brightcove-recorder-thumbnail-' + videoId).html('');
           input.val('');
         }
-        Drupal.modalFrame.open({url: Drupal.settings.basePath + 'video_recorder/record/popup/' + videoId, width: 700});
+        Drupal.modalFrame.open({url: Drupal.settings.basePath + '?q=video_recorder/record/popup/' + videoId, width: 700});
         button.val(rerecord);
         return false;
       })
@@ -30,14 +30,14 @@ Drupal.behaviors.brightcoveRecorderAttachActions = function(context) {
       $(this).bind('video-saved', {}, function(e, data) {
         var elm = $(this),
 	  videoId = data,
-	  requestURL = Drupal.settings.basePath + 'brightcove_recorder/upload/' + videoId;
+	  requestURL = Drupal.settings.basePath + '?q=brightcove_recorder/upload/' + videoId;
           $('.throbber').show();
 	  $.post(requestURL, '', function(data) {
 	    if (data.brightcove_id) {
 	      var input = $('input.brightcove-video-' + videoId, window.parent.document),
                 thumbnail = $('#brightcove-recorder-thumbnail-' + videoId, window.parent.document);
-	      input.val('[id:' + data.brightcove_id + ']');
-              thumbnail.html('<img src="' + Drupal.settings.basePath + 'video_recorder/thumbnail/' + videoId + '" alt="' + Drupal.t('Thumbnail') + '"/>');
+	      input.val('Upload: ' + videoId + ' [id:' + data.brightcove_id + ']');
+              thumbnail.html('<img src="' + Drupal.settings.basePath + '?q=video_recorder/thumbnail/' + videoId + '" alt="' + Drupal.t('Thumbnail') + '"/>');
 	      window.parent.Drupal.modalFrame.close();
 	      return false;
 	    }
