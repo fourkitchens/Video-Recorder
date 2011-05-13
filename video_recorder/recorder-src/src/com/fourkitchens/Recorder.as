@@ -1,5 +1,6 @@
 package com.fourkitchens
 {
+	import mx.controls.Alert;
 	[Bindable] public class Recorder
 	{
 		public var maxLength:int=90;
@@ -11,7 +12,6 @@ package com.fourkitchens
 		public var microRate:int=22;
 		public var showVolume:Boolean=true;
 		public var recordingText:String="Recording...";
-		public var timeLeftText:String="Time Left:";
 		public var timeLeft:int;
 		public var mode:String="record";
 		public var hasRecorded:Boolean=false;
@@ -26,8 +26,9 @@ package com.fourkitchens
 		public var keyframe:int=30; // every 2 seconds @ 15fps (default)
 		public var playText:String="Play";
 		public var recText:String="Rec";
+		public var recordingTimeExceededText:String = 'Recording stopped. Time exceeded.';
 		public var recordTooltipText:String="Start / stop recording";
-		public var reviewTooltipText:String="FUCK recording";
+		public var reviewTooltipText:String="Review recording";
 		public var saveText:String="Save";
 		public var saveTooltipText:String="Save recording to server";
 		public var settingsText:String="Settings";
@@ -41,14 +42,14 @@ package com.fourkitchens
 			options:Array = [
 				'backText', 'backToRecorder', 'bandwidth', 'compression', 'fileName', 'fps',
 				'height', 'id', 'keyframe', 'maxLength', 'microRate', 'mode', 'playText', 
-				'recText', 'recordingText', 'recordTooltipText', 'reviewTooltipText', 
-				'saveText', 'saveTooltipText', 'server', 'showVolume', 'timeLeft', 
-				'timeLeftText', 'width'
+				'recText', 'recordingTimeExceededText', 'recordingText', 'recordTooltipText',
+				'reviewTooltipText', 'saveText', 'saveTooltipText', 'server', 'showVolume',
+				'timeLeft', 'width'
 			];
 
 			for (option in options) {
 				key = options[option];
-				if (null != params[key]) {
+				if (undefined !== params[key]) {
 					this[key] = params[key]; 
 				}
 			}

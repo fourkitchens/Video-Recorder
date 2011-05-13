@@ -36,36 +36,38 @@ protected var thumbnailBytes:ByteArray;
 
 protected var customMenuItem:ContextMenuItem;
 
+protected var maxTimer:String = '';
+
 public function init():void {
 	myRecorder = new Recorder(Application.application.parameters);
 
 	Application.application.width = myRecorder.width;
 	Application.application.height = myRecorder.height;
-
-	recordingTimer.addEventListener("timer" , decrementTimer);
-
-	timeLeft = myRecorder.maxLength.toString();
-  	nc=new NetConnection();		
-	nc.client=this;		
-	nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
-	nc.connect(myRecorder.server);	
-
-	if (myRecorder.mode=="player") {
-		currentState="player";
-	} else {
-		currentState="";
-	}
 	
 	addContextMenuItems();
+
+	recordingTimer.addEventListener('timer', decrementTimer);
+
+	timeLeft = myRecorder.maxLength.toString();
+  	nc = new NetConnection();		
+	nc.client = this;		
+	nc.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+	nc.connect(myRecorder.server);
+
+	currentState = '';
+	if ('player' == myRecorder.mode) {
+		currentState = 'player';
+	}
+	
+	maxTimer = formatTime(myRecorder.maxLength);
+	setTimer(myRecorder.maxLength, maxTimer);
 }
 
 protected function recClicked():void { 
 	if (rec_btn.selected) {
-		recordingTimer.start();
 		captureThumbnail();
 		recordStart();
 	} else {
-		recordingTimer.stop();
 		recordFinished();
 		publishThumbnail();
 	}
@@ -146,7 +148,7 @@ protected function rollOver(e:MouseEvent):void {
 protected function netStatusHandler(event:NetStatusEvent):void {
 	switch (event.info.code) {
 		case "NetConnection.Connect.Failed":
-			Alert.show("ERROR:Could not connect to: "+myRecorder.server);
+			Alert.show("ERROR:Could not connect to server : " + myRecorder.server);
 			break;	
 		case "NetConnection.Connect.Success":
 			prepareStreams();
@@ -158,28 +160,58 @@ protected function netStatusHandler(event:NetStatusEvent):void {
 }
 
 public function recordStart():void {
+	if (outOfTime()) {
+		return recordFinished(true);
+	}
+	rec_btn.selected = true;
 	nsOutGoing.publish(myRecorder.fileName, "record");
+	recordingTimer.start();
 	myRecorder.hasRecorded = true;
 }
 
-public function recordFinished():void {
+public function recordFinished(exceeded:Boolean=false):void {
+	if (exceeded) {
+		Alert.show(myRecorder.recordingTimeExceededText);
+	}
+
+	recordingTimer.stop();
+	rec_btn.selected = false;
 	nsOutGoing.close();
 }
 
-private  function decrementTimer( event:TimerEvent ):void {
-	var minutes:int;
-	var seconds:int;
-	myRecorder.timeLeft--;
-	minutes = myRecorder.timeLeft / 60;
-	seconds = myRecorder.timeLeft % 60;
-	if (minutes<10) timeLeft="0"+ minutes+":" else timeLeft=minutes+":";
-	if (seconds<10) timeLeft=timeLeft+"0"+ seconds else timeLeft=timeLeft+seconds;
+protected function decrementTimer(event:TimerEvent ):void {
 
-	
-	// format to display mm:ss format
-	if (myRecorder.timeLeft==0) {
-		recordFinished();
+	myRecorder.timeLeft--;
+	setTimer(myRecorder.timeLeft, maxTimer);
+	if (outOfTime()) {
+		return recordFinished(true);
 	}
+}
+
+public function setTimer(remaining:int, total:String):void {
+	timeLeft = formatTime(remaining) + '/' + total;
+}
+
+protected function formatTime(time:int):String { 
+	var minutes:int, 
+	seconds:int,
+	min:String,
+	sec:String;
+	
+	minutes = time / 60;
+	seconds = time % 60;
+	
+	min = '' + minutes;
+	if (minutes < 10) {
+		min = '0' + minutes;
+	}
+	
+	sec = '' + seconds;
+	if (seconds < 10) {
+		sec = '0' + seconds;
+	}
+	
+	return min + ':' + sec; 
 }
 
 public function webcamParameters():void {
@@ -274,7 +306,13 @@ protected function addContextMenuItems():void {
  * This has to be public for the event to handler work - skwashd 20110512.
  */ 
 public function projectMenuItemSelected(event:ContextMenuEvent):void {
-	Alert.show("Event Fired!");
 	var URL:URLRequest = new URLRequest('http://drupal.org/project/video_recorder');
 	navigateToURL(URL);
+}
+
+/**
+* Checks to see if the user has exceeded the time limit.
+*/
+protected function outOfTime():Boolean { 
+	return (myRecorder.timeLeft <= 0);
 }
