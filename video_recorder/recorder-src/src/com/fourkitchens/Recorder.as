@@ -44,7 +44,7 @@ package com.fourkitchens
 				'height', 'id', 'keyframe', 'maxLength', 'microRate', 'mode', 'playText', 
 				'recText', 'recordingTimeExceededText', 'recordingText', 'recordTooltipText',
 				'reviewTooltipText', 'saveText', 'saveTooltipText', 'server', 'showVolume',
-				'timeLeft', 'width'
+				'thumbnailSaveURL', 'timeLeft', 'width'
 			];
 
 			for (option in options) {
