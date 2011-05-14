@@ -74,7 +74,7 @@ protected function recClicked():void {
 }
 
 protected function videoIsComplete():void {
-	playPauseBut.selected=true;
+	playPauseBut.selected = true;
 	playPause();
 }
 
@@ -85,18 +85,20 @@ protected function thumbClicked(e:MouseEvent):void {
 public function stopVideo():void {
 	var s:String = myRecorder.server+myRecorder.fileName+".flv";
 	videoPlayer.source = s;
+	playPause();
 	videoPlayer.stop();
-	playPauseBut.selected = false;
+	// selecting this button was the only way I found to cause it to reset to "Play" when the user hits Stop - rupl 20110514
+	playPauseBut.selected = true;
 }
 
 protected function replay():void {
-	rec_btn.selected=false;
+	rec_btn.selected = false;
 	recClicked();
 	currentState="player";
 	var s:String = myRecorder.server+myRecorder.fileName+".flv";
 	videoPlayer.source = s;
-	// and start the video !
-	playPauseBut.selected=false;
+	// start the video
+	playPauseBut.selected = false;
 	playPause();
 }
 
@@ -106,7 +108,7 @@ protected function save():void {
 }
 
 protected function playPause():void{
-	if (playPauseBut.selected) {
+	if (videoPlayer.playing) {
 		videoPlayer.pause();
 	} else {
 		videoPlayer.play();
@@ -114,7 +116,7 @@ protected function playPause():void{
 }
 
 protected function thumbPressed():void {
-	playPauseBut.selected=true;
+	playPauseBut.selected = true;
 	videoPlayer.pause();
 }	
 

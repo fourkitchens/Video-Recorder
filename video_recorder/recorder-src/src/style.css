@@ -19,10 +19,29 @@
 	selected-over-icon: Embed(source="assets/player_play.png");
 	selected-up-icon: Embed(source="assets/player_play.png");
 }
+
 .stopButton { 
 	down-icon: Embed(source="assets/player_stop.png"); 
 	over-icon: Embed(source="assets/player_stop.png"); 
 	up-icon: Embed(source="assets/player_stop.png"); 
+}
+
+.saveButton {
+	borderColor: #444444;
+	color: #FFFFFF;
+	up-color: #ffffff;
+	fillAlphas: 0.6, 0.6, 0.6, 0.6;
+	fillColors: #000000, #000000;
+	icon: Embed(source="assets/circle.png");
+}
+
+.backButton {
+	borderColor: #444444;
+	color: #FFFFFF;
+	up-color: #ffffff;
+	fillAlphas: 0.6, 0.6, 0.6, 0.6;
+	fillColors: #000000, #000000;
+	icon: Embed(source="assets/back.png");
 }
 
 .scrollBar {
@@ -62,3 +81,4 @@ HSlider {
 	fontFamily: Arial;
 	fontSize: 10;
 }
+
