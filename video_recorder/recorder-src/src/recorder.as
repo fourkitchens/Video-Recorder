@@ -74,8 +74,8 @@ protected function recClicked():void {
 }
 
 protected function videoIsComplete():void {
+	videoPlayer.stop();
 	playPauseBut.selected = true;
-	playPause();
 }
 
 protected function thumbClicked(e:MouseEvent):void {
