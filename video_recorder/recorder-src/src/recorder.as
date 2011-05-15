@@ -168,7 +168,6 @@ public function recordStart():void {
 	rec_btn.selected = true;
 	nsOutGoing.publish(myRecorder.fileName, "record");
 	recordingTimer.start();
-	myRecorder.hasRecorded = true;
 }
 
 public function recordFinished(exceeded:Boolean=false):void {
@@ -178,6 +177,7 @@ public function recordFinished(exceeded:Boolean=false):void {
 
 	recordingTimer.stop();
 	rec_btn.selected = false;
+	myRecorder.hasRecorded = true;
 	nsOutGoing.close();
 }
 

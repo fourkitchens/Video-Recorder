@@ -41,7 +41,7 @@
 						<mx:Button id="playPauseBut" styleName="playButton" click="playPause();" width="32" height="32" cornerRadius="5" top="1" left="0"  toolTip="Play/Pause" toggle="true"  fillAlphas="[0.6, 0.6, 0.6, 0.6]" fillColors="[#000000, #000000]" borderColor="#444444"/>
 						<mx:Button id="stopBut" 	 styleName="stopButton" click="stopVideo()"  width="32" height="32" cornerRadius="5" top="1" left="38" toolTip="Stop"  borderColor="#444444" fillAlphas="[0.6, 0.6, 0.6, 0.6]" fillColors="[#000000, #000000]"/>
 						
-						<gauge:Gauge id="volume" gaugeClick="handleGaugeEvent(event)" liveDragging="true" right="0" top="2" width="32" height="32" needleThickness="0.3" coverColor="#0000FF" coverAlpha="0.8" coverDropShadowEnabled="false" />
+						<gauge:Gauge id="volume" gaugeClick="handleGaugeEvent(event)" liveDragging="true" right="0" top="7" width="32" height="24" needleThickness="0.3" coverColor="#666666" coverAlpha="0.8" coverDropShadowEnabled="false"  needleColor="#222222"/>
 						<mx:Label id="timer_txt" y="-2" text="{formatTime(videoPlayer.playheadTime)} / {formatTime(videoPlayer.totalTime)}" width="141" horizontalCenter="6" textAlign="center" color="#ccddee" />
 						
 						
@@ -61,7 +61,7 @@
 		</mx:Canvas>
 		<mx:Button y="3" icon="@Embed('assets/webcamON.png')" height="18" width="35"
 				   id="cam1_btn" click="webcamParameters()" toolTip="{myRecorder.settingsText}" label="1" x="3" fillAlphas="[0.6, 0.6, 0.6, 0.6]" fillColors="[#000000, #000000]" borderColor="#444444" color="#FFFFFF"/>
-		<mx:ProgressBar label="{myRecorder.volumeText}" labelPlacement="center" minimum="0" maximum="100" id="micLevel" mode="manual" visible="{myRecorder.showVolume}" bottom="0" right="0" left="0"/>
+		<mx:ProgressBar label="{myRecorder.volumeText}" labelPlacement="center" minimum="0" maximum="100" id="micLevel" mode="manual" visible="{myRecorder.showVolume}" bottom="0" right="0" left="0" barColor="#666666"/>
 		<mx:Canvas id="canvas1" height="40" left="5" right="5" bottom="21" cornerRadius="5" borderStyle="solid" borderColor="#000000" backgroundColor="#000000" backgroundAlpha="0.5" alpha="1" color="#FFFFFF">
 			<mx:Label right="5" y="6" text="{timeLeft}" color="#ccddee"/>
 			<mx:Button id="rec_btn"    label="{myRecorder.recText}"  width="32" height="32" top="3" left="48"   click="recClicked()" toolTip="{myRecorder.recordTooltipText}" 								visible="{myRecorder.cameraDetected}" styleName="recordButton" toggle="true"  borderColor="#444444" fillAlphas="[0.6, 0.6, 0.6, 0.6]" fillColors="[#000000, #000000]" cornerRadius="4"/>
