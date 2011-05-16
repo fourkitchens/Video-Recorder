@@ -151,7 +151,7 @@ function brightcove_recorder_node_form_submit($form, &$form_state) {
     }
 
     $tpl = '[title-raw]';
-    if($token_enabled && !empty($field['title_template'])) {
+    if ($token_enabled && !empty($field['title_template'])) {
       $tpl = $field['title_template'];
     }
 
@@ -167,7 +167,8 @@ function brightcove_recorder_node_form_submit($form, &$form_state) {
         if ($token_enabled) {
           $key = "{$name}|{$i}";
           _brightcove_recorder_retitle_hack($key, $tpl);
-        } else {
+        }
+        else {
           if (0 <> $i) {
             $title .= "-{$i}";
           }
@@ -261,7 +262,7 @@ function brightcove_recorder_node_form_after_build($form, &$form_state) {
 function brightcove_recorder_upload($video_id) {
   global $user;
 
-  if(!video_recorder_id_verify($video_id)) {
+  if (!video_recorder_id_verify($video_id)) {
     drupal_set_header('Status: 404 Not Found');
     return drupal_json(array('error' => 'Invalid video ID.'));
   }
@@ -301,7 +302,7 @@ function brightcove_recorder_upload($video_id) {
   }
 
   // Work around for brightcove API lag for uploads
-  $video = new StdClass();
+  $video = new stdClass();
   $video->id = $id;
   $video->name = $video_id;
   brightcove_video_cache_set($id, $video);
@@ -372,7 +373,7 @@ function brightcove_recorder_process_item($item) {
         return FALSE;
       }
   }
-  db_query('DELETE FROM {brightcove_recorder_queue} WHERE qid = %s', $item['qid']);
+  db_query("DELETE FROM {brightcove_recorder_queue} WHERE qid = '%s'", $item['qid']);
 }
 
 /**
