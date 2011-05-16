@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ *  AJN Video recorder installation related functions.
+ */
+
+/**
  * Implements hook_install().
  */
 function ajn_recorder_install() {

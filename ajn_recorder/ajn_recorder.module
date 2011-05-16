@@ -45,7 +45,7 @@ function aje_recorder_form_brightcove_admin_settings_validate(&$form, &$form_sta
  */
 function ajn_recorder_form_alter(&$form, &$form_state, $form_id) {
 
-  if('brightcove_admin_settings' == $form_id) {
+  if ('brightcove_admin_settings' == $form_id) {
     return aje_recorder_brightcove_admin_settings_alter($form, $form_state);
   }
 
