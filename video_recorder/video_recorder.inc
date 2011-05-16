@@ -84,7 +84,7 @@ function video_recorder_id_generate() {
  * Removes a video from the known ID list.
  */
 function video_recorder_id_remove($video_id) {
-  if(!empty($_SESSION['video_recorder']['ids'])) {
+  if (!empty($_SESSION['video_recorder']['ids'])) {
     unset($_SESSION['video_recorder']['ids']);
   }
 }

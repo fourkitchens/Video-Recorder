@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ *  Video Recorder module admin functions.
+ */
+
+/**
  * Video recorder admin settings form.
  */
 function video_recorder_admin() {
