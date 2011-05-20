@@ -25,7 +25,6 @@ public var ns:NetStream;
 public var camera:Camera;
 public var mic:Microphone;
 public var nsOutGoing:NetStream;
-//public var nsInGoing:NetStream;
 public const ROOMMODEL:String="models";
 [Bindable] public var myRecorder:Recorder;
 public var DEBUG:Boolean=false;
@@ -69,7 +68,6 @@ protected function recClicked():void {
 		recordStart();
 	} else {
 		recordFinished();
-		publishThumbnail();
 	}
 }
 
@@ -103,6 +101,8 @@ protected function replay():void {
 }
 
 protected function save():void {
+	nsOutGoing.close();
+	publishThumbnail();
 	var jsFunction:String = 'videoRecorder.save("' + myRecorder.id + '", "' + myRecorder.fileName + '")';
 	ExternalInterface.call(jsFunction);
 }
@@ -166,7 +166,6 @@ public function recordStart():void {
 		return recordFinished(true);
 	}
 	rec_btn.selected = true;
-	nsOutGoing.publish(myRecorder.fileName, "record");
 	recordingTimer.start();
 }
 
@@ -178,8 +177,11 @@ public function recordFinished(exceeded:Boolean=false):void {
 	recordingTimer.stop();
 	rec_btn.selected = false;
 	myRecorder.hasRecorded = true;
-	nsOutGoing.close();
 }
+
+/*
+ Timer functions
+ */
 
 protected function decrementTimer(event:TimerEvent ):void {
 
@@ -216,6 +218,13 @@ protected function formatTime(time:int):String {
 	return min + ':' + sec; 
 }
 
+/**
+* Checks to see if the user has exceeded the time limit.
+*/
+protected function outOfTime():Boolean { 
+	return (myRecorder.timeLeft <= 0);
+}
+
 public function webcamParameters():void {
 	Security.showSettings(SecurityPanel.DEFAULT);
 }
@@ -225,7 +234,7 @@ protected function drawMicLevel(evt:TimerEvent):void {
 		micLevel.setProgress(ac,100);
 }
 
-private  function prepareStreams():void {
+private function prepareStreams():void {
 	nsOutGoing = new NetStream(nc); 
 	camera=Camera.getCamera();
 	if (camera==null) {
@@ -250,7 +259,8 @@ private  function prepareStreams():void {
 		timer.addEventListener(TimerEvent.TIMER, drawMicLevel);
 		timer.start();
 		nsOutGoing.attachAudio(mic);
-	}	
+	}
+	nsOutGoing.publish(myRecorder.fileName, "record");
 }
    
 protected function cameraStatus(evt:StatusEvent):void {
@@ -263,6 +273,10 @@ protected function cameraStatus(evt:StatusEvent):void {
 			break;
 	}
 }
+
+/*
+ Thumbnail functions
+*/
 
 protected function captureThumbnail():void {
 	if (!myRecorder.thumbnailSaveURL) {
@@ -290,6 +304,9 @@ protected function publishThumbnail():void {
 	urlLoader.load(saveImage);
 }
 
+/*
+ Context menu functions
+ */
 protected function addContextMenuItems():void {
 	if (!contextMenu) {
 		contextMenu = new ContextMenu();
@@ -312,9 +329,3 @@ public function projectMenuItemSelected(event:ContextMenuEvent):void {
 	navigateToURL(URL);
 }
 
-/**
-* Checks to see if the user has exceeded the time limit.
-*/
-protected function outOfTime():Boolean { 
-	return (myRecorder.timeLeft <= 0);
-}
