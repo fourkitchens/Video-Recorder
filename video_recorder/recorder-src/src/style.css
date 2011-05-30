@@ -1,32 +1,18 @@
-/* CSS file */
-.recordButton {
-	selected-disabled-icon: Embed(source="assets/player_pause.png"); 
-	selected-over-icon: Embed(source="assets/player_pause.png");
-	selected-up-icon: Embed(source="assets/player_pause.png");
-	
-	down-icon: Embed(source="assets/rec32.png");
-	over-icon: Embed(source="assets/rec32-over.png"); 
-	up-icon: Embed(source="assets/rec32.png");
-	backgroundColor: #000;
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+s|ToggleButton#recordButton,
+s|ToggleButton#playButton {
+	horizontalCenter: 0;
+	verticalCenter: 0;
 }
 
-.playButton { 
-	down-icon: Embed(source="assets/player_pause.png"); 
-	over-icon: Embed(source="assets/player_pause.png"); 
-	up-icon: Embed(source="assets/player_pause.png"); 
-	
-	selected-disabled-icon: Embed(source="assets/player_play.png"); 
-	selected-over-icon: Embed(source="assets/player_play.png");
-	selected-up-icon: Embed(source="assets/player_play.png");
+#position,
+mx|ProgressBar {
+	verticalCenter: 0;
 }
 
-.stopButton { 
-	down-icon: Embed(source="assets/player_stop.png"); 
-	over-icon: Embed(source="assets/player_stop.png"); 
-	up-icon: Embed(source="assets/player_stop.png"); 
-}
-
-.saveButton {
+#saveButton {
 	borderColor: #444444;
 	color: #FFFFFF;
 	up-color: #ffffff;
@@ -35,22 +21,66 @@
 	icon: Embed(source="assets/circle.png");
 }
 
-.backButton {
-	borderColor: #444444;
-	color: #FFFFFF;
-	up-color: #ffffff;
-	fillAlphas: 0.6, 0.6, 0.6, 0.6;
-	fillColors: #000000, #000000;
-	icon: Embed(source="assets/back.png");
-}
-
 .scrollBar {
+	color: #f67c00;
 	thumb-icon: Embed(source="assets/circle.png"); 
 	thumb-up-skin: Embed(source="assets/circle.png"); 
 	thumb-down-skin: Embed(source="assets/circle.png"); 
 	thumb-over-skin: Embed(source="assets/circle.png"); 
-}		
-ToolTip {
+}
+
+#recordingStatus,
+#videoControls {
+	alpha: 1;
+	backgroundAlpha: 0.6;
+	backgroundColor: #000;
+	color: #fff;
+	z: 10;	
+}
+
+#recordingStatus {
+	padding: 10;
+}
+
+#videoControls {
+	bottom: 0;
+	backgroundAlpha: 0.6;
+	backgroundColor: #000;
+	left: 0;
+	padding: 10;
+	right: 0;
+}
+
+#playerRightControls {
+	right: 10;
+	verticalCenter: 0;
+}
+
+s|PopUpAnchor {
+	backgroundColor: #000;
+}
+
+s|MuteButton {
+	symbolColor: #e5e5e5;
+}
+
+mx|Text,
+s|Button,
+s|Label,
+s|ToggleButton {
+	color: #fff;
+	fontName: Arial, Helvetica, sans-serif;
+	fontSize: 13px;
+	fontWeight: bold;
+}
+
+#timer{
+	bottom: 10;
+	verticalCenter: 0;
+	right: 5;
+}
+
+mx|ToolTip {
 	backgroundAlpha: 0.8;
 	backgroundColor: #000;
 	borderStyle: solid;
@@ -60,25 +90,12 @@ ToolTip {
 	font-size: 13;
 }
 
-HSlider {
-	
-	dataTipPlacement: right;
-	dataTipOffset: 0;
-}
-.arial16E {
-	fontFamily: Arial;
-	fontSize: 16;
-}
-.arial14E {
-	fontFamily: Arial;
-	fontSize: 14;
-}        
-.arial12E {
-	fontFamily: Arial;
-	fontSize: 12;
-}
-.arial10E {
-	fontFamily: Arial;
-	fontSize: 10;
+mx|ProgressBar {
+	verticalCenter: 0;
+	left: 5;
 }
 
+#recordingStatus {
+	left: 10;
+	top: 10;
+}

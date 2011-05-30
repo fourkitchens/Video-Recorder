@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009"
+			 xmlns:s="library://ns.adobe.com/flex/spark"
+			 xmlns:fb="http://ns.adobe.com/flashbuilder/2009"
+			 xmlns:mx="library://ns.adobe.com/flex/mx"
+			 minWidth="32"
+			 minHeight="32"
+			 width="32"
+			 height="32"
+			 alpha.disabledStates="0.5">
+
+    <!-- host component -->
+    <fx:Metadata>
+    <![CDATA[ 
+        /** 
+         * @copy spark.skins.spark.ApplicationSkin#hostComponent
+         */
+        [HostComponent("spark.components.ToggleButton")]
+    ]]>
+    </fx:Metadata>
+	
+    <!-- states -->
+    <s:states>
+        <s:State name="up" />
+        <s:State name="over" stateGroups="overStates" />
+        <s:State name="down" stateGroups="downStates" />
+        <s:State name="disabled" stateGroups="disabledStates" />
+        <s:State name="upAndSelected" stateGroups="selectedStates, selectedUpStates" />
+        <s:State name="overAndSelected" stateGroups="overStates, selectedStates" />
+        <s:State name="downAndSelected" stateGroups="downStates, selectedStates" />
+        <s:State name="disabledAndSelected" stateGroups="selectedUpStates, disabledStates, selectedStates" />
+    </s:states>
+	
+	<s:Ellipse id="recordButtonBackground" height="32" width="32">
+		<s:fill>
+			<s:RadialGradient>
+				<s:GradientEntry color="#e5e5e5"
+								 alpha="1" />
+			</s:RadialGradient>
+		</s:fill>
+	</s:Ellipse>
+	<s:Ellipse height="16" width="16" top="8" left="8" includeIn="up, over, down, disabled">
+		<s:fill>
+			<s:RadialGradient>
+				<s:GradientEntry color="#ff0000"
+								 alpha="1" />
+			</s:RadialGradient>
+		</s:fill>
+	</s:Ellipse>
+
+	<s:Rect top="8" left="8" height="16" width="16" includeIn="upAndSelected, overAndSelected, downAndSelected, disabledAndSelected">
+		<s:fill>
+			<s:SolidColor color="#000000" />
+		</s:fill>
+	</s:Rect>
+</s:SparkSkin>
