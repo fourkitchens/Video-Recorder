@@ -68,6 +68,7 @@ function video_recorder_recorder($video_id) {
   }
 
   $base = drupal_get_path('module', 'video_recorder');
+  drupal_add_css("{$base}/video_recorder.css");
   drupal_add_js("{$base}/video_recorder.js");
 
   $options = video_recorder_defaults();
@@ -162,6 +163,7 @@ function theme_video_recorder_recorder($video_id, $options=array()) {
 
   $content = <<<HTML
     <div id="{$id}-wrapper" class="video-recorder-wrapper">
+      <div class="throbber"></div>
       <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="{$id}" class="video-recorder" width="640" height="480"
         codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
         <param name="movie" value="{$recorder}" />
